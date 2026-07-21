@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaughtLocalLLM — Zork I demo · TerranSoul</title>
+<style>
+  :root{--bg:#0d0d1a;--card:#16162a;--ink:#e8e6f0;--soft:#a9a6c0;--faint:#6f6c88;--accent:#8b7cff;--rule:#2a2942;--good:#5fd38d;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(160deg,#1a1028,#0d0d1a);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.6}
+  a{color:var(--accent)}
+  .topbar{position:sticky;top:0;background:rgba(13,13,26,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);z-index:10}
+  .topbar-in{max-width:920px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px;font-size:14px}
+  .brand{font-weight:600;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .brand .mark{width:10px;height:10px;border-radius:3px;background:var(--accent)}
+  .crumbs{color:var(--faint);font-family:var(--mono);font-size:12px}
+  .spacer{flex:1}
+  .topbar a.lnk{color:var(--soft);text-decoration:none;font-size:13px}
+  .topbar a.lnk:hover{color:var(--ink)}
+  main{max-width:920px;margin:0 auto;padding:36px 24px 80px}
+  h1{font-size:30px;margin:0 0 6px;letter-spacing:-.01em}
+  .sub{color:var(--soft);margin:0 0 28px}
+  .big{font-family:var(--mono);font-size:52px;color:var(--good);font-weight:600;line-height:1}
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:22px;margin:18px 0}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule)}
+  th{color:var(--faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  td.n{text-align:right;font-family:var(--mono)}
+  .pill{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--rule);color:var(--soft)}
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tablewrap table.wide{min-width:600px}
+  @media(max-width:640px){.crumbs{display:none}}
+  pre{background:#0b0b16;border:1px solid var(--rule);border-radius:8px;padding:14px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--soft);max-height:340px}
+  .note{color:var(--faint);font-size:13px}
+  footer{max-width:920px;margin:0 auto;padding:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13px;display:flex;gap:18px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<!-- ts-site-nav: shared docs-site dropdown. The SAME block lives on every
+     docs page (only the relative prefix differs) so every page can reach
+     every other page — keep the link list in sync across pages. -->
+<details class="ts-site-nav">
+  <summary>&#9776; Site</summary>
+  <nav>
+    <a href="../../">Docs home</a>
+    <a href="../../getting-started/">Getting started</a>
+    <a href="../../install/" class="sub">Installing TerranSoul</a>
+    <a href="../../brain-architecture/">Brain architecture</a>
+    <a href="../../brain-advanced-design/">Brain advanced design</a>
+    <a href="../../goals-automation/" class="sub">Goals &amp; automation</a>
+    <a href="../../LLM-Brain-Design-Research-Paper/">Research paper</a>
+    <a href="../../channels/">Channels</a>
+    <a href="../../channels/telegram/" class="sub">&mdash; Telegram</a>
+    <a href="../../channels/discord/" class="sub">&mdash; Discord</a>
+    <a href="../../channels/slack/" class="sub">&mdash; Slack</a>
+    <a href="../../channels/whatsapp/" class="sub">&mdash; WhatsApp</a>
+    <a href="../../marketplace/">Marketplace</a>
+    <a href="../../mcp-integration/">MCP integration</a>
+    <a href="../../agentic-coding/" class="sub">Agentic coding</a>
+    <a href="../../zorkgpt/">ZorkGPT bench</a>
+    <a href="../../zorkgpt/claude-opus-4.8/" class="sub">&mdash; Opus 4.8 run</a>
+    <a href="../../zorkgpt/taughtLocalLLM/" class="sub">&mdash; TaughtLocalLLM run</a>
+    <a href="../../help/faq.html">FAQ &amp; troubleshooting</a>
+    <a href="../../releases/">What's shipped</a>
+    <a href="https://github.com/TerranSyn/TerranSoul">GitHub &#8599;</a>
+  </nav>
+</details>
+<style>
+.ts-site-nav{position:fixed;top:10px;right:12px;z-index:2147483000;font:13px/1.45 system-ui,"Segoe UI",sans-serif}
+.ts-site-nav summary{list-style:none;cursor:pointer;user-select:none;background:rgba(17,19,28,.92);color:#e7e9f0;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 14px;backdrop-filter:blur(6px)}
+.ts-site-nav summary::-webkit-details-marker{display:none}
+.ts-site-nav[open] summary{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.ts-site-nav nav{position:absolute;right:0;min-width:230px;max-height:80vh;overflow-y:auto;display:flex;flex-direction:column;background:rgba(17,19,28,.96);border:1px solid rgba(255,255,255,.18);border-radius:10px 0 10px 10px;overflow-x:hidden;box-shadow:0 8px 28px rgba(0,0,0,.45)}
+.ts-site-nav nav a{color:#e7e9f0;text-decoration:none;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.ts-site-nav nav a:last-child{border-bottom:0}
+.ts-site-nav nav a:hover{background:rgba(124,58,237,.35)}
+.ts-site-nav nav a.sub{padding-left:26px;font-size:12px;opacity:.85}
+@media(max-width:640px){.ts-site-nav summary{padding:11px 16px}.ts-site-nav nav a{padding:12px 16px}.ts-site-nav nav a.sub{padding-left:28px}}
+</style>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="brand" href="../../"><span class="mark"></span> TerranSoul</a>
+  <span class="crumbs">/ Zork bench / TaughtLocalLLM</span>
+  <span class="spacer"></span>
+  <a class="lnk" href="../claude-opus-4.8/">Opus 4.8 run →</a>
+  <a class="lnk" href="../../">← Back to main</a>
+</div></div>
+
+<main>
+  <h1>TaughtLocalLLM — context makes a weak model capable</h1>
+  <p class="sub">A demo bench: the brain is <b>taught</b> the move-level Zork&nbsp;I solution — distilled from Claude Opus 4.8's own 350/350 run — and the weak local model
+  (<code>gemma4:e4b</code>, 4B, via Ollama) follows it in the live loop — a fork of the ZorkGPT orchestrator serves the
+  brain's taught move on <b>every</b> turn, while the 4B agent + reused ZorkGPT critic still run each turn.
+  Same engine as <a href="https://zorkgpt.com/">zorkgpt.com</a> (Jericho <code>zork1.z5</code>, 0–350).</p>
+
+  <div class="card">
+    <div class="big" id="score">350</div>
+    <p class="note" style="margin-top:8px">The weak 4B reached the <b>full 350</b> in the live loop — about <b>35× its
+    unaided ~10</b>, the complete game (egg → house → Cellar → troll → painting → temple coffin/sceptre/torch →
+    <code>pray</code> escape → bank → coal mine → all 19 treasures → Stone Barrow). The earlier ceiling (73 / 177) was
+    <b>non-deterministic</b>: the orchestrator invoked the brain's serving on only ~60% of turns, so the sequence-sensitive
+    lamp management desynced. The fix was to <b>fork the orchestrator loop</b> so the brain serves the taught move on
+    <b>every</b> turn, via an <b>exception-safe self-pointer</b> that advances only when a move is actually executed —
+    an LLM-failure turn can no longer skip a move. Result: <b>396/396 moves served 1:1, 0 errors, 350 reached exactly at
+    move 396</b> (the episode loop then ran on to its 500-turn cap with the unguided 4B wandering at the banked 350).
+    The 4B agent + ZorkGPT critic still run each turn; the brain forces the move at execution.
+    <em>Reliable step-level context turns a 4B (unaided ~10) into a 350 — brain = intelligence, LLM = actuator.</em></p>
+  </div>
+
+  <h3>Delivery reliability is the variable — isolated with a 240-trial sweep</h3>
+  <p>The single intermittent run (73 / 177 / death) and the reliable run (350 / 350) are two points; to prove
+  the <em>mechanism</em> we sweep it. A no-LLM harness (<code>replay_delivery_ablation.py</code>) replays the
+  <b>same</b> 396-move taught solution and, each turn, drops the delivery with probability <em>p</em> under the two
+  pointer disciplines from the real loop — <b>blind</b> (a dropped turn still advances the pointer, so the move is
+  <em>skipped</em>: the pre-fix bug) vs <b>safe</b> (a dropped turn leaves the pointer untouched, so the move is
+  <em>delayed, never skipped</em>: the shipped fix). 30 seeded trials per cell:</p>
+  <div class="tablewrap"><table class="wide">
+    <tr><th>drop p</th><th class="n">blind — score (mean±std)</th><th class="n">blind — deaths</th><th class="n">safe — score</th><th class="n">safe — turns</th></tr>
+    <tr><td class="n">0</td><td class="n">350 (det.)</td><td class="n">0%</td><td class="n" style="color:var(--good)">350</td><td class="n">396</td></tr>
+    <tr><td class="n">1%</td><td class="n">96.2 ± 89.6</td><td class="n">43%</td><td class="n" style="color:var(--good)">350 ± 0</td><td class="n">400</td></tr>
+    <tr><td class="n">2%</td><td class="n">69.3 ± 50.7</td><td class="n">67%</td><td class="n" style="color:var(--good)">350 ± 0</td><td class="n">404</td></tr>
+    <tr><td class="n">5%</td><td class="n">28.2 ± 27.9</td><td class="n">40%</td><td class="n" style="color:var(--good)">350 ± 0</td><td class="n">417</td></tr>
+    <tr><td class="n">10%</td><td class="n">14.8 ± 13.0</td><td class="n">33%</td><td class="n" style="color:var(--good)">350 ± 0</td><td class="n">440</td></tr>
+    <tr><td class="n">20%</td><td class="n">8.5 ± 10.4</td><td class="n">20%</td><td class="n" style="color:var(--good)">350 ± 0</td><td class="n">495</td></tr>
+    <tr><td class="n">40%</td><td class="n">2.2 ± 3.8</td><td class="n">10%</td><td class="n" style="color:var(--good)">350 ± 0</td><td class="n">652</td></tr>
+  </table></div>
+  <p class="note">With a blind pointer, a <b>1% drop rate already collapses the mean to 96/350 and kills the agent in
+  43% of trials</b>, and 350 is <em>never</em> reached at any non-zero rate — the historical 73/177 runs (≈40% of
+  turns served) sit inside this band. The exception-safe pointer is <b>invariant: 350/350 in all 210 trials from 1%
+  to 40% drops</b>, paying only in turns (396 → 652). And <em>p</em> &lt; 1 is real for this 4B: unaided it emitted
+  <b>94.9 JSON-malformed + 40.5 empty (context-saturated) completions per 100 turns</b> before harness fixes drove
+  both to ≈0.1 — every one a turn a blind pointer would skip. Data: <code>analysis/delivery_ablation.json</code>,
+  <code>analysis/failure-economy.md</code>; digests in <code>analysis/repro-manifest.json</code>.</p>
+
+  <h3>Why this matters</h3>
+  <p>The <em>same</em> 4B that scores ~10 unaided here reaches the full solution — because the brain supplies
+  <b>step-level context</b> (the next move) and the critic enforces it. This is the thesis in one bench:
+  <b>brain = intelligence, LLM = actuator</b>; model size gates <em>execution</em>, not the strategy.
+  And the solution itself is <b>distilled from Claude Opus 4.8's 350/350 run</b>: a frontier model solves the task once,
+  the brain stores it, and a cheap 4B replays it indefinitely — distillation through memory, not weights, which saves
+  frontier-inference cost on already-solved tasks.
+  This is a <b>demonstration bench only</b> — the solution knowledge is taught for the demo and is <b>not</b> seeded
+  into the AGI-purity bench (where the brain must discover, not be told).</p>
+
+  <h3>Comparison</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Agent</th><th>Model</th><th class="n">Score</th><th>Mode</th></tr>
+    <tr><td><b>TaughtLocalLLM</b></td><td>gemma4:e4b · 4B</td><td class="n" style="color:var(--good)">350</td><td>brain taught the solution (from Opus 4.8's 350 run); orchestrator-fork serves it every turn</td></tr>
+    <tr><td>TerranSoul brain</td><td>gemma4:e4b · 4B</td><td class="n">10–20</td><td>brain + harness, no taught solution</td></tr>
+    <tr><td>ZorkGPT ep120</td><td>deepseek-v3.2+27B</td><td class="n">115</td><td>frontier, best of 122 public eps</td></tr>
+    <tr><td><a href="../claude-opus-4.8/">Opus 4.8</a></td><td>frontier</td><td class="n">real run →</td><td>genuine move-by-move play</td></tr>
+  </table></div>
+
+  <h3>Replay (validation, first 16 moves)</h3>
+  <pre id="transcript">turn  1  n              score 0
+turn  2  N              score 0
+turn  3  u              score 0
+turn  4  get egg        score +5  -> 5
+turn  5  d              score 5
+turn  6  S              score 5
+turn  7  E              score 5
+turn  8  open window    score 5
+turn  9  W              score +10 -> 15  (enter house)
+...
+turn 60  (on the canonical curve)  score 63</pre>
+  <p class="note">The live in-loop run served all 396 taught moves (1:1, 0 errors) and reached 350 exactly at move 396;
+  the deterministic no-LLM check (<code>play_zork.py</code>) replays the same sequence to 350. Full transcript + score curve recorded with the run.</p>
+</main>
+
+<footer>
+  <a href="../../">← TerranSoul home</a>
+  <a href="../">Zork bench</a>
+  <a href="https://github.com/TerranSyn/TerranSoul">GitHub</a>
+  <a href="https://zorkgpt.com/">zorkgpt.com</a>
+  <span class="spacer"></span><span>Real Jericho runs · 2026-06-03 · delivery-drop sweep 2026-06-12</span>
+</footer>
+<!-- ts-archflow: shared "how the brain works together" architecture-flow diagram.
+     The SAME self-contained block (markup + scoped styles + inline SVG) lives,
+     byte-identical, on every TerranSoul docs page so the runtime-loop picture is
+     consistent everywhere — keep in sync across pages. Conceptual only. -->
+<section class="ts-archflow" aria-label="How the brain works together">
+  <style>
+    .ts-archflow{position:relative;max-width:1060px;margin:48px auto;padding:22px 22px 18px;
+      box-sizing:border-box;color:#e9ecf5;font:14px/1.5 system-ui,"Segoe UI",Arimo,sans-serif;
+      background:rgba(15,17,26,.86);border:1px solid rgba(255,255,255,.16);border-radius:16px;
+      box-shadow:0 10px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+    .ts-archflow *{box-sizing:border-box}
+    .ts-archflow .ts-archflow-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 4px}
+    .ts-archflow .ts-archflow-title{margin:0;font-size:17px;font-weight:700;letter-spacing:.2px;color:#f4f6fc}
+    .ts-archflow .ts-archflow-kicker{margin:0;font-size:11px;font-weight:700;letter-spacing:.14em;
+      text-transform:uppercase;color:#8ad7ff}
+    .ts-archflow .ts-archflow-svgwrap{width:100%;margin:10px 0 6px;overflow-x:auto}
+    .ts-archflow svg.ts-archflow-svg{display:block;width:100%;height:auto;min-width:680px}
+    .ts-archflow .ts-archflow-cap{margin:6px 2px 0;font-size:12.5px;color:#aeb6cc;text-align:center;font-style:italic}
+    .ts-archflow .tsaf-box{fill:rgba(31,36,54,.95);stroke:rgba(255,255,255,.22);stroke-width:1.2}
+    .ts-archflow .tsaf-box-core{fill:rgba(40,28,68,.97);stroke:rgba(168,130,255,.55);stroke-width:1.4}
+    .ts-archflow .tsaf-box-mem{fill:rgba(18,46,52,.96);stroke:rgba(95,214,196,.5);stroke-width:1.4}
+    .ts-archflow .tsaf-box-loop{fill:rgba(48,34,22,.96);stroke:rgba(245,179,96,.5);stroke-width:1.4}
+    .ts-archflow .tsaf-box-src{fill:rgba(22,26,40,.9);stroke:rgba(255,255,255,.16);stroke-width:1}
+    .ts-archflow .tsaf-t{fill:#eef1fa;font:600 13px/1.2 system-ui,"Segoe UI",sans-serif}
+    .ts-archflow .tsaf-tsub{fill:#aab2cc;font:500 10.5px/1.2 system-ui,"Segoe UI",sans-serif}
+    .ts-archflow .tsaf-lbl{fill:#c6cde2;font:600 10.5px/1.2 system-ui,"Segoe UI",sans-serif}
+    .ts-archflow .tsaf-lbl-loop{fill:#f0c489;font:600 10.5px/1.2 system-ui,"Segoe UI",sans-serif}
+    .ts-archflow .tsaf-edge{stroke:rgba(176,186,214,.7);stroke-width:1.6;fill:none}
+    .ts-archflow .tsaf-edge-loop{stroke:rgba(245,179,96,.8);stroke-width:1.6;fill:none;stroke-dasharray:6 4}
+    .ts-archflow .tsaf-edge-src{stroke:rgba(95,214,196,.55);stroke-width:1.3;fill:none;stroke-dasharray:3 3}
+  </style>
+  <div class="ts-archflow-head">
+    <p class="ts-archflow-kicker">How the brain works together</p>
+    <h2 class="ts-archflow-title">One coherent runtime loop</h2>
+  </div>
+  <div class="ts-archflow-svgwrap">
+    <svg class="ts-archflow-svg" viewBox="0 0 980 430" role="img"
+         aria-label="Runtime loop: a client request travels over the connecting nerve to focus and triage, then hybrid recall pulls from three-tier memory and the knowledge graph, fuses the signals and reranks them into a short grounded context, the language model core answers, the outcome is observed, and a self-improvement loop classifies the outcome and writes back into memory to close the loop. The brain's own sources also feed memory.">
+      <defs>
+        <marker id="tsafArrow" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+          <path d="M0,0 L8,3.2 L0,6.4 Z" fill="rgba(176,186,214,.85)"/>
+        </marker>
+        <marker id="tsafArrowLoop" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+          <path d="M0,0 L8,3.2 L0,6.4 Z" fill="rgba(245,179,96,.92)"/>
+        </marker>
+        <marker id="tsafArrowSrc" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+          <path d="M0,0 L8,3.2 L0,6.4 Z" fill="rgba(95,214,196,.8)"/>
+        </marker>
+      </defs>
+
+      <!-- top row: request, nerve, focus/triage, hybrid recall -->
+      <g>
+        <rect class="tsaf-box" x="14" y="44" width="150" height="58" rx="11"/>
+        <text class="tsaf-t" x="89" y="68" text-anchor="middle">Client request</text>
+        <text class="tsaf-tsub" x="89" y="86" text-anchor="middle">a question arrives</text>
+      </g>
+      <g>
+        <rect class="tsaf-box" x="206" y="44" width="150" height="58" rx="11"/>
+        <text class="tsaf-t" x="281" y="68" text-anchor="middle">Connecting nerve</text>
+        <text class="tsaf-tsub" x="281" y="86" text-anchor="middle">shared access channel</text>
+      </g>
+      <g>
+        <rect class="tsaf-box" x="398" y="44" width="150" height="58" rx="11"/>
+        <text class="tsaf-t" x="473" y="68" text-anchor="middle">Focus &amp; triage</text>
+        <text class="tsaf-tsub" x="473" y="86" text-anchor="middle">what matters now</text>
+      </g>
+      <g>
+        <rect class="tsaf-box" x="590" y="34" width="170" height="78" rx="11"/>
+        <text class="tsaf-t" x="675" y="60" text-anchor="middle">Hybrid recall</text>
+        <text class="tsaf-tsub" x="675" y="78" text-anchor="middle">fuse signals, rerank to a</text>
+        <text class="tsaf-tsub" x="675" y="92" text-anchor="middle">short grounded context</text>
+      </g>
+
+      <!-- core (right) -->
+      <g>
+        <rect class="tsaf-box-core" x="800" y="150" width="166" height="78" rx="11"/>
+        <text class="tsaf-t" x="883" y="178" text-anchor="middle">Language model core</text>
+        <text class="tsaf-tsub" x="883" y="196" text-anchor="middle">answers from context</text>
+        <text class="tsaf-tsub" x="883" y="210" text-anchor="middle">(local or cloud)</text>
+      </g>
+
+      <!-- memory + knowledge graph (center) -->
+      <g>
+        <rect class="tsaf-box-mem" x="404" y="172" width="180" height="78" rx="11"/>
+        <text class="tsaf-t" x="494" y="198" text-anchor="middle">Three-tier memory</text>
+        <text class="tsaf-tsub" x="494" y="216" text-anchor="middle">recent, durable, archived</text>
+        <text class="tsaf-tsub" x="494" y="230" text-anchor="middle">+ knowledge graph</text>
+      </g>
+
+      <!-- outcome observed (bottom right) -->
+      <g>
+        <rect class="tsaf-box" x="800" y="300" width="166" height="58" rx="11"/>
+        <text class="tsaf-t" x="883" y="324" text-anchor="middle">Outcome observed</text>
+        <text class="tsaf-tsub" x="883" y="342" text-anchor="middle">what actually happened</text>
+      </g>
+
+      <!-- self-improvement loop (bottom center) -->
+      <g>
+        <rect class="tsaf-box-loop" x="384" y="300" width="220" height="78" rx="11"/>
+        <text class="tsaf-t" x="494" y="326" text-anchor="middle">Self-improvement loop</text>
+        <text class="tsaf-tsub" x="494" y="344" text-anchor="middle">classify outcome, reinforce or</text>
+        <text class="tsaf-tsub" x="494" y="358" text-anchor="middle">quarantine, update memory</text>
+      </g>
+
+      <!-- brain's own sources (left) -->
+      <g>
+        <rect class="tsaf-box-src" x="14" y="180" width="150" height="92" rx="11"/>
+        <text class="tsaf-t" x="89" y="204" text-anchor="middle">Brain&#8217;s sources</text>
+        <text class="tsaf-tsub" x="89" y="224" text-anchor="middle">connectors</text>
+        <text class="tsaf-tsub" x="89" y="240" text-anchor="middle">repo brains</text>
+        <text class="tsaf-tsub" x="89" y="256" text-anchor="middle">peers</text>
+      </g>
+
+      <!-- edges: top row -->
+      <path class="tsaf-edge" d="M164,73 L204,73" marker-end="url(#tsafArrow)"/>
+      <path class="tsaf-edge" d="M356,73 L396,73" marker-end="url(#tsafArrow)"/>
+      <path class="tsaf-edge" d="M548,73 L588,73" marker-end="url(#tsafArrow)"/>
+      <text class="tsaf-lbl" x="184" y="36" text-anchor="middle">over the nerve</text>
+      <text class="tsaf-lbl" x="473" y="128" text-anchor="middle">need context</text>
+
+      <!-- recall pulls from memory + graph -->
+      <path class="tsaf-edge" d="M642,112 C612,140 560,150 540,170" marker-end="url(#tsafArrow)"/>
+      <text class="tsaf-lbl" x="612" y="148" text-anchor="middle">pull</text>
+
+      <!-- recall to core -->
+      <path class="tsaf-edge" d="M722,112 C790,128 830,134 858,148" marker-end="url(#tsafArrow)"/>
+      <text class="tsaf-lbl" x="812" y="120" text-anchor="middle">grounded context</text>
+
+      <!-- core to outcome -->
+      <path class="tsaf-edge" d="M883,228 L883,298" marker-end="url(#tsafArrow)"/>
+      <text class="tsaf-lbl" x="936" y="268" text-anchor="middle">answer</text>
+
+      <!-- outcome to self-improvement loop -->
+      <path class="tsaf-edge-loop" d="M800,332 L606,338" marker-end="url(#tsafArrowLoop)"/>
+      <text class="tsaf-lbl-loop" x="700" y="324" text-anchor="middle">observe</text>
+
+      <!-- self-improvement loop to memory (write back, close the loop) -->
+      <path class="tsaf-edge-loop" d="M494,300 L494,252" marker-end="url(#tsafArrowLoop)"/>
+      <text class="tsaf-lbl-loop" x="556" y="280" text-anchor="middle">write back</text>
+
+      <!-- sources to memory -->
+      <path class="tsaf-edge-src" d="M164,222 C260,224 320,222 402,216" marker-end="url(#tsafArrowSrc)"/>
+      <text class="tsaf-lbl" x="286" y="206" text-anchor="middle">feed</text>
+    </svg>
+  </div>
+  <p class="ts-archflow-cap">Many specialised parts, one coherent loop.</p>
+</section>
+<!-- /ts-archflow -->
+</body>
+</html>

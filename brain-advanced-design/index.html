@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inside the TerranSoul Brain — how an LLM gets memory, recall and skill</title>
+<meta name="description" content="A plain-language tour of the TerranSoul brain: an LLM core wrapped in brain-region modules — focus, memory, recall, graph, affect, skills — reached over one MCP nerve. Three-tier memory, four cognitive axes, hybrid multi-signal recall, local-or-cloud brain modes, a self-improvement loop, the twenty-one BCF cognitive faculties (including insight, creativity, cognitive control and governed self-evolving memory) mapped to real brain regions, refreshed against the freshest-2026 research frontier, per-turn adaptive thinking modes, an optional deep-research coverage mode (exhaustive cited answers), a consolidated sharded database design, and generic patterns adopted from rival agent systems." />
+<link rel="canonical" href="https://terranimus.github.io/brain-advanced-design/" />
+<!-- Fonts: self-contained (system-font stacks, no external fetch) -->
+<style>
+  :root{
+    --bg:#05080f; --bg-card:#0a1322; --bg-card2:#070d18; --bg-inner:#060c16;
+    --ink:#dbe6f5; --ink-soft:#c2d2e8; --ink-faint:#7d92b3; --ink-mute:#6f88a6;
+    --rule:#142033; --rule2:#1f3a52; --rule3:#15293c;
+    --cyan:#22d3ee; --cyan-soft:#9fe9f5; --indigo:#818cf8; --violet:#a78bfa;
+    --green:#34d399; --pink:#f472b6; --amber:#fbbf24; --steel:#3f6f8c;
+    --sans:'Space Grotesk',system-ui,sans-serif;
+    --display:'Orbitron',sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background-image:radial-gradient(ellipse at 50% -8%, rgba(34,211,238,0.08) 0%, rgba(5,8,15,0) 55%);background-repeat:no-repeat}
+  ::selection{background:rgba(34,211,238,0.22);color:#e9fbff}
+  a{color:var(--cyan-soft);text-decoration:none}
+  a:hover{color:#dffaff}
+
+  /* ===== shared docs-site nav (kept in sync across every docs page) ===== */
+  .ts-site-nav{position:fixed;top:10px;right:12px;z-index:2147483000;font:13px/1.45 system-ui,"Segoe UI",sans-serif}
+  .ts-site-nav summary{list-style:none;cursor:pointer;user-select:none;background:rgba(17,19,28,.92);color:#e7e9f0;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:10px 16px;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center;backdrop-filter:blur(6px)}
+  .ts-site-nav summary::-webkit-details-marker{display:none}
+  .ts-site-nav[open] summary{border-bottom-left-radius:0;border-bottom-right-radius:0}
+  .ts-site-nav nav{position:absolute;right:0;min-width:230px;max-height:80vh;overflow-y:auto;display:flex;flex-direction:column;background:rgba(17,19,28,.96);border:1px solid rgba(255,255,255,.18);border-radius:10px 0 10px 10px;overflow-x:hidden;box-shadow:0 8px 28px rgba(0,0,0,.45)}
+  .ts-site-nav nav a{color:#e7e9f0;text-decoration:none;padding:11px 14px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.07)}
+  .ts-site-nav nav a:last-child{border-bottom:0}
+  .ts-site-nav nav a:hover{background:rgba(124,58,237,.35)}
+  .ts-site-nav nav a.sub{padding-left:26px;font-size:12px;opacity:.85}
+
+  /* ===== top bar ===== */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(5,8,15,0.82);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--rule)}
+  .topbar-in{max-width:var(--maxw);margin:0 auto;padding:12px 32px;display:flex;align-items:center;gap:18px;font-size:13px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:0.02em}
+  .brand-mark{width:16px;height:16px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px rgba(34,211,238,0.6);position:relative}
+  .brand-mark::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--bg)}
+  .crumbs{color:var(--ink-faint);display:flex;gap:9px;align-items:center;font-family:var(--mono);font-size:11px}
+  .crumbs em{font-style:normal;color:var(--ink-soft)}
+  .topbar .spacer{flex:1}
+  .topbar a.lnk{color:var(--ink-faint);font-family:var(--mono);font-size:11px;letter-spacing:0.04em}
+  .topbar a.lnk:hover{color:var(--cyan-soft)}
+  @media (max-width:820px){.crumbs{display:none}.topbar-in{gap:12px;padding:10px 18px}}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+  @media (max-width:560px){.wrap{padding:0 18px}}
+
+  /* ===== hero ===== */
+  header.hero{padding:64px 0 30px}
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--steel);margin-bottom:16px}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,46px);line-height:1.07;letter-spacing:0.005em;margin:0 0 18px}
+  h1 .glow{color:var(--cyan);text-shadow:0 0 22px rgba(34,211,238,0.5)}
+  .deck{font-size:clamp(17px,2.2vw,20px);line-height:1.55;color:var(--ink-soft);max-width:760px;margin:0 0 26px}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:0.03em;border:1px solid var(--rule2);border-radius:8px;padding:9px 15px;background:rgba(34,211,238,0.06);color:var(--cyan-soft);transition:border-color .2s,color .2s,background .2s}
+  .btn:hover{border-color:var(--cyan);color:#dffaff;background:rgba(34,211,238,0.12)}
+  .btn.ghost{background:transparent;border-color:var(--rule2);color:var(--ink-faint)}
+  .btn.ghost:hover{color:var(--cyan-soft);border-color:var(--steel)}
+
+  /* ===== section scaffolding ===== */
+  section{padding:30px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--steel);margin-bottom:9px}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(22px,3vw,28px);line-height:1.15;margin:0 0 12px;letter-spacing:0.005em}
+  h2 .accent{color:var(--cyan)}
+  h3{font-family:var(--display);font-weight:600;font-size:16px;margin:0 0 6px;color:#eef6ff;letter-spacing:0.01em}
+  p{font-size:16.5px;line-height:1.68;margin:0 0 16px;color:var(--ink-soft);max-width:760px}
+  p.lede{font-size:18px;color:var(--ink)}
+  strong{color:#eef6ff;font-weight:600}
+  .muted{color:var(--ink-faint)}
+
+  /* ===== cards ===== */
+  .card{background:linear-gradient(180deg,var(--bg-card),var(--bg-card2));border:1px solid var(--rule2);border-radius:14px;padding:20px 22px;box-shadow:0 18px 50px rgba(0,0,0,0.32)}
+  .grid{display:grid;gap:16px}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:840px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+  .region{display:flex;flex-direction:column;gap:7px}
+  .region .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase}
+  .region .name{font-family:var(--display);font-weight:600;font-size:15px;color:#eef6ff}
+  .region p{font-size:14px;margin:0;color:var(--ink-soft)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;vertical-align:middle;margin-right:8px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+  .chip{font-family:var(--mono);font-size:10px;letter-spacing:0.03em;padding:3px 9px;border:1px solid var(--rule2);border-radius:6px;color:var(--cyan-soft)}
+
+  figure{margin:22px 0;background:var(--bg-inner);border:1px solid var(--rule3);border-radius:14px;padding:18px;overflow:hidden}
+  figure svg{display:block;width:100%;height:auto}
+  figcaption{font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-align:center;margin-top:12px;letter-spacing:0.02em}
+
+  .callout{background:rgba(34,211,238,0.05);border:1px solid var(--rule2);border-left:3px solid var(--cyan);border-radius:8px;padding:14px 18px;margin:18px 0;font-size:15px;color:var(--ink-soft)}
+  .callout strong{color:var(--cyan-soft)}
+
+  ul.clean{list-style:none;padding:0;margin:0 0 16px;max-width:760px}
+  ul.clean li{position:relative;padding-left:22px;margin-bottom:9px;font-size:16px;color:var(--ink-soft)}
+  ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px rgba(34,211,238,0.7)}
+
+  .axes{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media (max-width:840px){.axes{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:480px){.axes{grid-template-columns:1fr}}
+  .axis{border:1px solid var(--rule2);border-radius:12px;padding:15px 16px;background:var(--bg-card)}
+  .axis h4{font-family:var(--display);font-weight:600;font-size:14px;margin:0 0 5px;color:#eef6ff}
+  .axis .k{font-family:var(--mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--steel);margin-bottom:8px}
+  .axis p{font-size:13.5px;margin:0;color:var(--ink-faint)}
+
+  /* ===== cognitive-faculty roster (BCF-01..21) ===== */
+  .bcf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin:4px 0 6px}
+  @media (max-width:840px){.bcf-grid{grid-template-columns:1fr}}
+  .bcf-row{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--rule2);border-radius:11px;padding:12px 14px;background:var(--bg-card)}
+  .bcf-row .bcf-code{font-family:var(--mono);font-size:10px;letter-spacing:0.05em;color:var(--cyan-soft);background:rgba(34,211,238,0.07);border:1px solid var(--rule2);border-radius:6px;padding:3px 7px;white-space:nowrap;flex-shrink:0}
+  .bcf-row .bcf-body{flex:1;min-width:0}
+  .bcf-row .bcf-title{font-family:var(--display);font-weight:600;font-size:13.5px;color:#eef6ff;margin:0 0 2px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .bcf-row .bcf-reg{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--steel);margin:0 0 5px}
+  .bcf-row p{font-size:13px;line-height:1.5;margin:0;color:var(--ink-faint);max-width:none}
+  .badge{font-family:var(--mono);font-size:8.5px;letter-spacing:0.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid;white-space:nowrap;flex-shrink:0}
+  .badge-live{color:#7dffd0;border-color:rgba(52,211,153,0.5);background:rgba(52,211,153,0.08)}
+  .badge-partial{color:#ffe1a3;border-color:rgba(251,191,36,0.45);background:rgba(251,191,36,0.07)}
+  .badge-planned{color:#9fc7dd;border-color:var(--rule2);background:rgba(127,146,179,0.06)}
+
+  /* ===== database-design tables / shard cards ===== */
+  .dtable{width:100%;border-collapse:collapse;margin:6px 0 16px;font-size:13.5px}
+  .dtable th,.dtable td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  .dtable th{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--steel);font-weight:500}
+  .dtable td{color:var(--ink-soft)}
+  .dtable td code,.dtable th code{font-family:var(--mono);font-size:12px;color:var(--cyan-soft)}
+  .dtable tr:last-child td{border-bottom:0}@media(max-width:640px){.dtable{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+  .shard{display:flex;flex-direction:column;gap:6px}
+  .shard .sh-name{font-family:var(--mono);font-size:13px;color:#eef6ff}
+  .shard .sh-tag{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:2px}
+  .shard p{font-size:13px;margin:0;color:var(--ink-faint)}
+
+  /* ===== footer ===== */
+  footer.page-foot{border-top:1px solid var(--rule);margin-top:24px;padding:40px 0 64px}
+  .foot-in{max-width:var(--maxw);margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-end;font-size:13px;color:var(--ink-faint)}
+  .foot-links{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:0.04em}
+  .endmark{display:flex;align-items:center;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;margin:34px 0 0}
+  .endmark::before,.endmark::after{content:"";flex:1;height:1px;background:var(--rule)}
+</style>
+</head>
+<body>
+
+<!-- ts-site-nav: shared docs-site dropdown (the SAME block lives on every docs page; keep links in sync). -->
+<details class="ts-site-nav">
+  <summary>&#9776; Site</summary>
+  <nav>
+    <a href="../">Docs home</a>
+    <a href="../getting-started/">Getting started</a>
+    <a href="../install/" class="sub">Installing TerranSoul</a>
+    <a href="../brain-architecture/">Brain architecture</a>
+    <a href="../brain-advanced-design/">Brain advanced design</a>
+    <a href="../goals-automation/" class="sub">Goals &amp; automation</a>
+    <a href="../LLM-Brain-Design-Research-Paper/">Research paper</a>
+    <a href="../channels/">Channels</a>
+    <a href="../channels/telegram/" class="sub">&mdash; Telegram</a>
+    <a href="../channels/discord/" class="sub">&mdash; Discord</a>
+    <a href="../channels/slack/" class="sub">&mdash; Slack</a>
+    <a href="../channels/whatsapp/" class="sub">&mdash; WhatsApp</a>
+    <a href="../marketplace/">Marketplace</a>
+    <a href="../mcp-integration/">MCP integration</a>
+    <a href="../agentic-coding/" class="sub">Agentic coding</a>
+    <a href="../zorkgpt/">ZorkGPT bench</a>
+    <a href="../zorkgpt/claude-opus-4.8/" class="sub">&mdash; Opus 4.8 run</a>
+    <a href="../zorkgpt/taughtLocalLLM/" class="sub">&mdash; TaughtLocalLLM run</a>
+    <a href="../help/faq.html">FAQ &amp; troubleshooting</a>
+    <a href="../releases/">What's shipped</a>
+    <a href="https://github.com/TerranSyn/TerranSoul">GitHub &#8599;</a>
+  </nav>
+</details>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="brand-mark"></span> <a href="../" style="color:#eef6ff">TerranSoul</a></div>
+    <div class="crumbs"><span>Design</span> <span>/</span> <em>Inside the brain</em></div>
+    <div class="spacer"></div>
+    <a class="lnk" href="../brain-architecture/">Brain map →</a>
+    <a class="lnk" href="../LLM-Brain-Design-Research-Paper/">Research paper</a>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">TerranSoul // Brain &amp; Memory · the design story</div>
+    <h1>Inside the brain: how an LLM gets <span class="glow">memory, recall &amp; skill</span></h1>
+    <p class="deck">A language model is brilliant in the moment and forgets everything between turns. TerranSoul wraps that model in the regions of a real brain — focus, memory, recall, association, feeling and skill — so it can remember, learn from outcomes, and grow more useful over time. This is the <em>what</em> and the <em>why</em>, in plain language.</p>
+    <div class="hero-cta">
+      <a class="btn" href="../brain-architecture/">Explore the interactive brain map →</a>
+      <a class="btn ghost" href="../LLM-Brain-Design-Research-Paper/">Read the research paper →</a>
+    </div>
+  </header>
+
+<!-- ts-archflow (brain-advanced-design page-specific: moved to top + retitled "Brain Architecture Design"). The shared bottom-of-page copy lives on the other docs pages.
+     The SAME self-contained block (markup + scoped styles + inline SVG) lives,
+     byte-identical, on every TerranSoul docs page so the runtime-loop picture is
+     consistent everywhere — keep in sync across pages. Conceptual only. -->
+<section class="ts-archflow" aria-label="Brain architecture design">
+  <style>
+    .ts-archflow{position:relative;max-width:1060px;margin:48px auto;padding:22px 22px 18px;
+      box-sizing:border-box;color:#e9ecf5;font:14px/1.5 system-ui,"Segoe UI",Arimo,sans-serif;
+      background:rgba(15,17,26,.86);border:1px solid rgba(255,255,255,.16);border-radius:16px;
+      box-shadow:0 10px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+    .ts-archflow *{box-sizing:border-box}
+    .ts-archflow .ts-archflow-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 4px}
+    .ts-archflow .ts-archflow-title{margin:0;font-size:17px;font-weight:700;letter-spacing:.2px;color:#f4f6fc}
+    .ts-archflow .ts-archflow-kicker{margin:0;font-size:11px;font-weight:700;letter-spacing:.14em;
+      text-transform:uppercase;color:#8ad7ff}
+    .ts-archflow .ts-archflow-svgwrap{width:100%;margin:10px 0 6px;overflow-x:auto}
+    .ts-archflow svg.ts-archflow-svg{display:block;width:100%;height:auto;min-width:680px}
+    .ts-archflow .ts-archflow-cap{margin:6px 2px 0;font-size:12.5px;color:#aeb6cc;text-align:center;font-style:italic}
+    .ts-archflow .tsaf-box{fill:rgba(31,36,54,.95);stroke:rgba(255,255,255,.22);stroke-width:1.2}
+    .ts-archflow .tsaf-box-core{fill:rgba(40,28,68,.97);stroke:rgba(168,130,255,.55);stroke-width:1.4}
+    .ts-archflow .tsaf-box-mem{fill:rgba(18,46,52,.96);stroke:rgba(95,214,196,.5);stroke-width:1.4}
+    .ts-archflow .tsaf-box-loop{fill:rgba(48,34,22,.96);stroke:rgba(245,179,96,.5);stroke-width:1.4}
+    .ts-archflow .tsaf-box-src{fill:rgba(22,26,40,.9);stroke:rgba(255,255,255,.16);stroke-width:1}
+    .ts-archflow .tsaf-t{fill:#eef1fa;font:600 13px/1.2 system-ui,"Segoe UI",sans-serif}
+    .ts-archflow .tsaf-tsub{fill:#aab2cc;font:500 10.5px/1.2 system-ui,"Segoe UI",sans-serif}
+    .ts-archflow .tsaf-lbl{fill:#c6cde2;font:600 10.5px/1.2 system-ui,"Segoe UI",sans-serif}
+    .ts-archflow .tsaf-lbl-loop{fill:#f0c489;font:600 10.5px/1.2 system-ui,"Segoe UI",sans-serif}
+    .ts-archflow .tsaf-edge{stroke:rgba(176,186,214,.7);stroke-width:1.6;fill:none}
+    .ts-archflow .tsaf-edge-loop{stroke:rgba(245,179,96,.8);stroke-width:1.6;fill:none;stroke-dasharray:6 4}
+    .ts-archflow .tsaf-edge-src{stroke:rgba(95,214,196,.55);stroke-width:1.3;fill:none;stroke-dasharray:3 3}
+  </style>
+  <div class="ts-archflow-head">
+    <p class="ts-archflow-kicker">How the brain works together</p>
+    <h2 class="ts-archflow-title">Brain Architecture Design</h2>
+  </div>
+  <div class="ts-archflow-svgwrap">
+    <svg class="ts-archflow-svg" viewBox="0 0 980 430" role="img"
+         aria-label="Runtime loop: a client request travels over the connecting nerve to focus and triage, then hybrid recall pulls from three-tier memory and the knowledge graph, fuses the signals and reranks them into a short grounded context, the language model core answers, the outcome is observed, and a self-improvement loop classifies the outcome and writes back into memory to close the loop. The brain's own sources also feed memory.">
+      <defs>
+        <marker id="tsafArrow" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+          <path d="M0,0 L8,3.2 L0,6.4 Z" fill="rgba(176,186,214,.85)"/>
+        </marker>
+        <marker id="tsafArrowLoop" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+          <path d="M0,0 L8,3.2 L0,6.4 Z" fill="rgba(245,179,96,.92)"/>
+        </marker>
+        <marker id="tsafArrowSrc" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+          <path d="M0,0 L8,3.2 L0,6.4 Z" fill="rgba(95,214,196,.8)"/>
+        </marker>
+      </defs>
+
+      <!-- top row: request, nerve, focus/triage, hybrid recall -->
+      <g>
+        <rect class="tsaf-box" x="14" y="44" width="150" height="58" rx="11"/>
+        <text class="tsaf-t" x="89" y="68" text-anchor="middle">Client request</text>
+        <text class="tsaf-tsub" x="89" y="86" text-anchor="middle">a question arrives</text>
+      </g>
+      <g>
+        <rect class="tsaf-box" x="206" y="44" width="150" height="58" rx="11"/>
+        <text class="tsaf-t" x="281" y="68" text-anchor="middle">Connecting nerve</text>
+        <text class="tsaf-tsub" x="281" y="86" text-anchor="middle">shared access channel</text>
+      </g>
+      <g>
+        <rect class="tsaf-box" x="398" y="44" width="150" height="58" rx="11"/>
+        <text class="tsaf-t" x="473" y="68" text-anchor="middle">Focus &amp; triage</text>
+        <text class="tsaf-tsub" x="473" y="86" text-anchor="middle">what matters now</text>
+      </g>
+      <g>
+        <rect class="tsaf-box" x="590" y="34" width="170" height="78" rx="11"/>
+        <text class="tsaf-t" x="675" y="60" text-anchor="middle">Hybrid recall</text>
+        <text class="tsaf-tsub" x="675" y="78" text-anchor="middle">fuse signals, rerank to a</text>
+        <text class="tsaf-tsub" x="675" y="92" text-anchor="middle">short grounded context</text>
+      </g>
+
+      <!-- core (right) -->
+      <g>
+        <rect class="tsaf-box-core" x="800" y="150" width="166" height="78" rx="11"/>
+        <text class="tsaf-t" x="883" y="178" text-anchor="middle">Language model core</text>
+        <text class="tsaf-tsub" x="883" y="196" text-anchor="middle">answers from context</text>
+        <text class="tsaf-tsub" x="883" y="210" text-anchor="middle">(local or cloud)</text>
+      </g>
+
+      <!-- memory + knowledge graph (center) -->
+      <g>
+        <rect class="tsaf-box-mem" x="404" y="172" width="180" height="78" rx="11"/>
+        <text class="tsaf-t" x="494" y="198" text-anchor="middle">Three-tier memory</text>
+        <text class="tsaf-tsub" x="494" y="216" text-anchor="middle">recent, durable, archived</text>
+        <text class="tsaf-tsub" x="494" y="230" text-anchor="middle">+ knowledge graph</text>
+      </g>
+
+      <!-- outcome observed (bottom right) -->
+      <g>
+        <rect class="tsaf-box" x="800" y="300" width="166" height="58" rx="11"/>
+        <text class="tsaf-t" x="883" y="324" text-anchor="middle">Outcome observed</text>
+        <text class="tsaf-tsub" x="883" y="342" text-anchor="middle">what actually happened</text>
+      </g>
+
+      <!-- self-improvement loop (bottom center) -->
+      <g>
+        <rect class="tsaf-box-loop" x="384" y="300" width="220" height="78" rx="11"/>
+        <text class="tsaf-t" x="494" y="326" text-anchor="middle">Self-improvement loop</text>
+        <text class="tsaf-tsub" x="494" y="344" text-anchor="middle">classify outcome, reinforce or</text>
+        <text class="tsaf-tsub" x="494" y="358" text-anchor="middle">quarantine, update memory</text>
+      </g>
+
+      <!-- brain's own sources (left) -->
+      <g>
+        <rect class="tsaf-box-src" x="14" y="180" width="150" height="92" rx="11"/>
+        <text class="tsaf-t" x="89" y="204" text-anchor="middle">Brain&#8217;s sources</text>
+        <text class="tsaf-tsub" x="89" y="224" text-anchor="middle">connectors</text>
+        <text class="tsaf-tsub" x="89" y="240" text-anchor="middle">repo brains</text>
+        <text class="tsaf-tsub" x="89" y="256" text-anchor="middle">peers</text>
+      </g>
+
+      <!-- edges: top row -->
+      <path class="tsaf-edge" d="M164,73 L204,73" marker-end="url(#tsafArrow)"/>
+      <path class="tsaf-edge" d="M356,73 L396,73" marker-end="url(#tsafArrow)"/>
+      <path class="tsaf-edge" d="M548,73 L588,73" marker-end="url(#tsafArrow)"/>
+      <text class="tsaf-lbl" x="184" y="36" text-anchor="middle">over the nerve</text>
+      <text class="tsaf-lbl" x="473" y="128" text-anchor="middle">need context</text>
+
+      <!-- recall pulls from memory + graph -->
+      <path class="tsaf-edge" d="M642,112 C612,140 560,150 540,170" marker-end="url(#tsafArrow)"/>
+      <text class="tsaf-lbl" x="612" y="148" text-anchor="middle">pull</text>
+
+      <!-- recall to core -->
+      <path class="tsaf-edge" d="M722,112 C790,128 830,134 858,148" marker-end="url(#tsafArrow)"/>
+      <text class="tsaf-lbl" x="812" y="120" text-anchor="middle">grounded context</text>
+
+      <!-- core to outcome -->
+      <path class="tsaf-edge" d="M883,228 L883,298" marker-end="url(#tsafArrow)"/>
+      <text class="tsaf-lbl" x="936" y="268" text-anchor="middle">answer</text>
+
+      <!-- outcome to self-improvement loop -->
+      <path class="tsaf-edge-loop" d="M800,332 L606,338" marker-end="url(#tsafArrowLoop)"/>
+      <text class="tsaf-lbl-loop" x="700" y="324" text-anchor="middle">observe</text>
+
+      <!-- self-improvement loop to memory (write back, close the loop) -->
+      <path class="tsaf-edge-loop" d="M494,300 L494,252" marker-end="url(#tsafArrowLoop)"/>
+      <text class="tsaf-lbl-loop" x="556" y="280" text-anchor="middle">write back</text>
+
+      <!-- sources to memory -->
+      <path class="tsaf-edge-src" d="M164,222 C260,224 320,222 402,216" marker-end="url(#tsafArrowSrc)"/>
+      <text class="tsaf-lbl" x="286" y="206" text-anchor="middle">feed</text>
+    </svg>
+  </div>
+  <p class="ts-archflow-cap">Many specialised parts, one coherent loop.</p>
+</section>
+<!-- /ts-archflow -->
+
+  <!-- ========== THE METAPHOR ========== -->
+  <section id="metaphor">
+    <div class="sec-num">01 · The metaphor</div>
+    <h2>An LLM core, wrapped in <span class="accent">brain regions</span></h2>
+    <p class="lede">Picture the model as the brain's thinking surface — the part that reasons, in the moment, about whatever is in front of it. On its own it has no memory of its own and no past. TerranSoul grafts on the other regions of a brain, each a small module that gives the core something it lacks.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 320" role="img" aria-label="An LLM core surrounded by six brain-region modules, all reaching it through one MCP nerve.">
+        <defs>
+          <radialGradient id="coreHalo" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#22d3ee" stop-opacity="0.55"/><stop offset="60%" stop-color="#22d3ee" stop-opacity="0.10"/><stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/></radialGradient>
+          <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818cf8"/><stop offset="50%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
+        </defs>
+        <!-- spokes -->
+        <g stroke="#27506c" stroke-width="1.2" stroke-dasharray="3 5" opacity="0.7">
+          <line x1="360" y1="150" x2="150" y2="60"/><line x1="360" y1="150" x2="360" y2="44"/><line x1="360" y1="150" x2="570" y2="60"/>
+          <line x1="360" y1="150" x2="150" y2="240"/><line x1="360" y1="150" x2="360" y2="256"/><line x1="360" y1="150" x2="570" y2="240"/>
+        </g>
+        <!-- core -->
+        <circle cx="360" cy="150" r="58" fill="url(#coreHalo)"/>
+        <circle cx="360" cy="150" r="40" fill="#06121c" stroke="url(#neon)" stroke-width="2.4"/>
+        <text x="360" y="146" text-anchor="middle" font-family="'Orbitron',sans-serif" font-weight="600" font-size="14" fill="#eafcff">LLM</text>
+        <text x="360" y="164" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#6f93a8">core · reasons now</text>
+        <!-- region nodes -->
+        <g font-family="'JetBrains Mono',monospace" font-size="10">
+          <g><circle cx="150" cy="60" r="9" fill="#0a1322" stroke="#818cf8" stroke-width="2"/><text x="150" y="40" text-anchor="middle" fill="#bcc6ff">Focus</text></g>
+          <g><circle cx="360" cy="44" r="9" fill="#0a1322" stroke="#a78bfa" stroke-width="2"/><text x="360" y="26" text-anchor="middle" fill="#d7c4ff">Memory</text></g>
+          <g><circle cx="570" cy="60" r="9" fill="#0a1322" stroke="#34d399" stroke-width="2"/><text x="570" y="40" text-anchor="middle" fill="#a9eccf">Graph</text></g>
+          <g><circle cx="150" cy="240" r="9" fill="#0a1322" stroke="#22d3ee" stroke-width="2"/><text x="150" y="262" text-anchor="middle" fill="#9fe9f5">Recall</text></g>
+          <g><circle cx="360" cy="256" r="9" fill="#0a1322" stroke="#f472b6" stroke-width="2"/><text x="360" y="278" text-anchor="middle" fill="#ffbfe8">Affect</text></g>
+          <g><circle cx="570" cy="240" r="9" fill="#0a1322" stroke="#fbbf24" stroke-width="2"/><text x="570" y="262" text-anchor="middle" fill="#ffe1a3">Skills</text></g>
+        </g>
+        <!-- nerve -->
+        <line x1="360" y1="190" x2="360" y2="300" stroke="#7de4ff" stroke-width="1.6" stroke-dasharray="4 5"/>
+        <circle cx="360" cy="300" r="11" fill="#06121c" stroke="#7de4ff" stroke-width="1.6"/>
+        <circle cx="360" cy="300" r="3" fill="#7de4ff"/>
+        <text x="384" y="304" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9fe9f5">MCP · the one nerve</text>
+      </svg>
+      <figcaption>One core, six regions, one nerve — everything any client reaches the brain through is the same MCP connection.</figcaption>
+    </figure>
+
+    <div class="grid grid-3" style="margin-top:6px">
+      <div class="card region"><span class="tag" style="color:#818cf8"><span class="dot" style="background:#818cf8"></span>FOCUS · the executive</span><span class="name">Focus</span><p>Not every message deserves deep thought. Focus sizes each turn and routes it — trivial ones skip the heavy machinery, hard ones get the full treatment. It keeps the brain fast and cheap when it can be.</p></div>
+      <div class="card region"><span class="tag" style="color:#a78bfa"><span class="dot" style="background:#a78bfa"></span>MEMORY · the memory-maker</span><span class="name">Memory</span><p>Forms new memories from what happens and files them for later. Memories flow through tiers and fade unless they're used again — much like human reinforcement and forgetting.</p></div>
+      <div class="card region"><span class="tag" style="color:#34d399"><span class="dot" style="background:#34d399"></span>GRAPH · the connector</span><span class="name">Knowledge graph</span><p>Stores facts as a web of links, not a flat list. By chaining links the brain can reach an answer that no single memory ever spelled out — connecting people, places and ideas across many small facts.</p></div>
+      <div class="card region"><span class="tag" style="color:#22d3ee"><span class="dot" style="background:#22d3ee"></span>RECALL · perception</span><span class="name">Hybrid recall</span><p>Surfaces the memories worth seeing for the question at hand. Several different search methods each weigh in, and their verdicts are merged into one trustworthy short list.</p></div>
+      <div class="card region"><span class="tag" style="color:#f472b6"><span class="dot" style="background:#f472b6"></span>AFFECT · feeling</span><span class="name">Affect</span><p>Reads the emotional tone of the brain's own reply, so a companion avatar can show the matching expression. Feeling is part of how it presents, not just what it says.</p></div>
+      <div class="card region"><span class="tag" style="color:#fbbf24"><span class="dot" style="background:#fbbf24"></span>SKILLS · practised know-how</span><span class="name">Skills</span><p>Learned how-to procedures that build confidence as they succeed and get benched when they keep failing — the brain getting better at the things it does often.</p></div>
+    </div>
+    <div class="callout"><strong>Inside these six regions, finer faculties live.</strong> The brain's design names <strong>twenty-one cognitive faculties</strong> (BCF-01…21) — confidence calibration, drives, a goal-stack, attention, motivation, insight, creativity, cognitive control, governed self-evolving memory and more — each anchored to a real anatomical region of these six, and all implemented today. <a href="#faculties">See the faculty layer below →</a></div>
+  </section>
+
+  <!-- ========== THREE-TIER MEMORY ========== -->
+  <section id="memory">
+    <div class="sec-num">02 · Three-tier memory</div>
+    <h2>How a fleeting moment becomes a <span class="accent">lasting memory</span></h2>
+    <p class="lede">Human memory isn't one bucket — a phone number you hold for ten seconds is different from a skill you keep for life. The brain uses three tiers, and memories graduate upward only when they earn it.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 230" role="img" aria-label="Three memory tiers — short-term, working, and long-term — with memories graduating upward when they're reused and fading when they're ignored.">
+        <defs><marker id="up" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7dffd0"/></marker></defs>
+        <g font-family="'JetBrains Mono',monospace">
+          <rect x="60" y="26" width="520" height="46" rx="9" fill="#0c1a27" stroke="#7de4ff" stroke-width="1.5"/>
+          <text x="80" y="49" font-size="13" fill="#bfe6f5" font-weight="500">SHORT-TERM</text>
+          <text x="80" y="64" font-size="10.5" fill="#7d92b3">the immediate conversation — the last little while, then gone</text>
+
+          <rect x="60" y="90" width="520" height="46" rx="9" fill="#0c1a27" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="80" y="113" font-size="13" fill="#d7c4ff" font-weight="500">WORKING</text>
+          <text x="80" y="128" font-size="10.5" fill="#7d92b3">what matters for this session — the active working set</text>
+
+          <rect x="60" y="154" width="520" height="46" rx="9" fill="#0c1a27" stroke="#34d399" stroke-width="1.5"/>
+          <text x="80" y="177" font-size="13" fill="#a9eccf" font-weight="500">LONG-TERM</text>
+          <text x="80" y="192" font-size="10.5" fill="#7d92b3">durable knowledge that persists — but gently fades if never used</text>
+        </g>
+        <g stroke="#7dffd0" stroke-width="1.5" fill="none" opacity="0.8">
+          <path d="M 600 113 C 632 113 632 60 602 49" marker-end="url(#up)"/>
+          <path d="M 600 177 C 632 177 632 124 602 113" marker-end="url(#up)"/>
+        </g>
+        <text x="648" y="116" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#8fe9c4">used again</text>
+        <text x="648" y="128" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#8fe9c4">= promoted</text>
+      </svg>
+      <figcaption>Memories graduate upward when they prove useful, and fade when they're ignored — so the store stays relevant instead of just growing.</figcaption>
+    </figure>
+
+    <div class="grid grid-3">
+      <div class="card region"><span class="name" style="color:#bfe6f5">Short-term</span><p style="font-size:14px">Holds the immediate flow of conversation. It's there so the brain stays coherent turn to turn, and it's allowed to disappear — most of what's said doesn't need to outlive the chat.</p></div>
+      <div class="card region"><span class="name" style="color:#d7c4ff">Working</span><p style="font-size:14px">The session's active picture — the facts, threads and goals that matter right now. A staging area where things that keep coming up start to look worth keeping.</p></div>
+      <div class="card region"><span class="name" style="color:#a9eccf">Long-term</span><p style="font-size:14px">Durable memory that survives across sessions. Crucially it isn't frozen: unused memories slowly decay, so the brain forgets the trivial and keeps the meaningful — like a person would.</p></div>
+    </div>
+    <div class="callout"><strong>Why it matters:</strong> graduation and decay are what keep the brain's memory <em>useful</em> rather than just <em>large</em>. Important things settle in; noise washes out.</div>
+  </section>
+
+  <!-- ========== COGNITIVE AXES ========== -->
+  <section id="axes">
+    <div class="sec-num">03 · Cognitive memory axes</div>
+    <h2>Four kinds of knowing — because <span class="accent">not all memory is the same</span></h2>
+    <p class="lede">A tier says <em>how long</em> a memory lives. But memories also differ in <em>what kind of knowing</em> they are — and the right one to surface depends on the question. The brain recognises four cognitive axes, drawn straight from how cognitive science describes human memory.</p>
+
+    <div class="axes">
+      <div class="axis"><div class="k" style="color:#22d3ee">Axis · episodic</div><h4>Episodic</h4><p>What happened, and when. The story of past events and conversations — "last time we tried this," "what we decided yesterday."</p></div>
+      <div class="axis"><div class="k" style="color:#818cf8">Axis · semantic</div><h4>Semantic</h4><p>Facts and meanings that hold regardless of when you learned them — definitions, properties, "what is this thing."</p></div>
+      <div class="axis"><div class="k" style="color:#34d399">Axis · procedural</div><h4>Procedural</h4><p>How to do something — the steps of a task. "How do I deploy this," recalled as a procedure rather than a fact.</p></div>
+      <div class="axis"><div class="k" style="color:#fbbf24">Axis · judgment</div><h4>Judgment</h4><p>Durable rules, heuristics and lessons — the hard-won "do it this way" wisdom that should outrank a one-off anecdote.</p></div>
+    </div>
+
+    <p style="margin-top:20px">The reason this matters is recall quality. A "how do I…" question should reach for procedures first; "what did we decide…" wants the episode; "what is…" wants the fact; and a settled rule should win over a passing remark. By understanding which kind of knowing a question is really asking for, the brain surfaces answers that feel right rather than merely related.</p>
+    <div class="callout"><strong>What we're sharing here is the idea, not the machinery.</strong> The value is recognising that memory has kinds and that the right kind should lead — how the brain decides which is which stays under the hood.</div>
+  </section>
+
+  <!-- ========== HYBRID RECALL ========== -->
+  <section id="recall">
+    <div class="sec-num">04 · Hybrid recall</div>
+    <h2>One answer, <span class="accent">many points of view</span></h2>
+    <p class="lede">No single way of searching memory is trustworthy on its own. Keyword search nails exact terms but misses meaning; meaning-based search catches paraphrases but fumbles precise identifiers; following links between facts reaches things neither would find alone. So instead of betting on one, the brain asks several — then fuses their answers.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 280" role="img" aria-label="Five recall signals — lexical, vector, knowledge-graph, freshness and activation — each producing a ranking that is fused and reranked into one final short list.">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5b8cff"/></marker></defs>
+        <g font-family="'JetBrains Mono',monospace" font-size="11">
+          <g><rect x="40" y="20" width="150" height="34" rx="8" fill="#0c1a27" stroke="#22d3ee" stroke-width="1.4"/><text x="56" y="41" fill="#9fe9f5">Lexical match</text></g>
+          <g><rect x="40" y="64" width="150" height="34" rx="8" fill="#0c1a27" stroke="#818cf8" stroke-width="1.4"/><text x="56" y="85" fill="#bcc6ff">Meaning / vector</text></g>
+          <g><rect x="40" y="108" width="150" height="34" rx="8" fill="#0c1a27" stroke="#34d399" stroke-width="1.4"/><text x="56" y="129" fill="#a9eccf">Knowledge graph</text></g>
+          <g><rect x="40" y="152" width="150" height="34" rx="8" fill="#0c1a27" stroke="#7de4ff" stroke-width="1.4"/><text x="56" y="173" fill="#bfe6f5">Freshness</text></g>
+          <g><rect x="40" y="196" width="150" height="34" rx="8" fill="#0c1a27" stroke="#fbbf24" stroke-width="1.4"/><text x="56" y="217" fill="#ffe1a3">Activation</text></g>
+        </g>
+        <g stroke="#5b8cff" stroke-width="1.3" fill="none" opacity="0.6">
+          <path d="M 190 37 C 280 37 300 110 360 124" marker-end="url(#ar)"/>
+          <path d="M 190 81 C 280 81 300 116 360 128" marker-end="url(#ar)"/>
+          <path d="M 190 125 L 360 130" marker-end="url(#ar)"/>
+          <path d="M 190 169 C 280 169 300 146 360 134" marker-end="url(#ar)"/>
+          <path d="M 190 213 C 280 213 300 156 360 138" marker-end="url(#ar)"/>
+        </g>
+        <rect x="362" y="106" width="118" height="50" rx="12" fill="#06121c" stroke="#22d3ee" stroke-width="2"/>
+        <text x="421" y="129" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#dffaff">FUSE</text>
+        <text x="421" y="144" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#6f93a8">+ rerank</text>
+        <line x1="480" y1="131" x2="520" y2="131" stroke="#22d3ee" stroke-width="1.6" marker-end="url(#ar)"/>
+        <g font-family="'JetBrains Mono',monospace" font-size="10">
+          <rect x="524" y="92" width="156" height="22" rx="5" fill="#0c1626" stroke="#34d399"/><text x="538" y="107" fill="#aef0cf">most relevant memory</text>
+          <rect x="524" y="120" width="156" height="22" rx="5" fill="#0c1626" stroke="#27506c"/><text x="538" y="135" fill="#9fc7dd">next best</text>
+          <rect x="524" y="148" width="156" height="22" rx="5" fill="#0c1626" stroke="#27506c"/><text x="538" y="163" fill="#9fc7dd">…a clean short list</text>
+        </g>
+        <text x="360" y="266" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#7de4ff">several independent signals → one fused, reranked answer — so no single method can dominate</text>
+      </svg>
+      <figcaption>Hybrid recall fuses several independent rankings, then reranks the result — the breadth of viewpoints is the point.</figcaption>
+    </figure>
+
+    <h3>The signals it fuses</h3>
+    <ul class="clean">
+      <li><strong>Lexical match</strong> — exact words and identifiers, the things meaning-search tends to blur.</li>
+      <li><strong>Meaning (vector) similarity</strong> — paraphrases and "this is about the same thing" matches.</li>
+      <li><strong>Knowledge-graph links</strong> — facts reached by following relationships between memories.</li>
+      <li><strong>Freshness</strong> — how recent and current a memory is.</li>
+      <li><strong>Activation</strong> — how connected and how often-used a memory is, a stand-in for "how alive it is in the brain right now."</li>
+    </ul>
+    <p>Their separate rankings are blended into one, then a final pass reorders the survivors for genuine relevance. The result reads as a single, confident answer — but it's a consensus of several independent opinions, which is exactly why it's hard to fool.</p>
+    <p>There is one more pass after the rerank: a <strong>set-level bias audit</strong> (the <a href="#faculties">BCF-15 faculty</a>) inspects the whole short list for statistical skew — one source over-represented, everything clustered in a single recent window, near-duplicate dominance, or members that contradict each other — and gently <em>down-weights</em> a skewed set before it ever reaches the model. Hybrid recall checks not just <em>which</em> memories surfaced, but whether the <em>set as a whole</em> is balanced.</p>
+    <p>For research and agent turns, this recall also feeds an optional <a href="#deep-research">deep-research answer-mode</a> that loops — critiquing its own coverage and following the knowledge graph — to assemble thoroughly-cited answers. It widens answer coverage, not retrieval: at production cutoffs its candidate set is the same one this single pass already returns.</p>
+    <div class="callout"><strong>The value proposition, not the recipe.</strong> The strength is the <em>fusion of multiple signals</em>, plus a final fairness check on the set. We name the signals on purpose and stop there — the exact way they're weighed and combined is deliberately not part of this page.</div>
+  </section>
+
+  <!-- ========== BRAIN MODES ========== -->
+  <section id="modes">
+    <div class="sec-num">05 · Brain modes</div>
+    <h2>Same brain, <span class="accent">your choice of mind</span></h2>
+    <p class="lede">The LLM at the core is pluggable. You can run a private model on your own machine, or reach for a frontier model in the cloud — and everything around it stays the same. Memory, recall, the graph, the skills: identical surface, swappable core.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 200" role="img" aria-label="The same brain surface served by either a local on-device model or a frontier cloud model — pluggable and interchangeable.">
+        <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7de4ff"/></marker></defs>
+        <rect x="270" y="70" width="180" height="60" rx="14" fill="#06121c" stroke="#22d3ee" stroke-width="2"/>
+        <text x="360" y="98" text-anchor="middle" font-family="'Orbitron',sans-serif" font-weight="600" font-size="13" fill="#dffaff">THE BRAIN</text>
+        <text x="360" y="116" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#6f93a8">memory · recall · graph · skills</text>
+        <g font-family="'JetBrains Mono',monospace" font-size="10.5">
+          <rect x="40" y="64" width="170" height="36" rx="9" fill="#0c1a27" stroke="#34d399" stroke-width="1.5"/><text x="56" y="80" fill="#a9eccf">Local model</text><text x="56" y="93" fill="#7d92b3" font-size="9">private · offline · on-device</text>
+          <rect x="40" y="108" width="170" height="36" rx="9" fill="#0c1a27" stroke="#818cf8" stroke-width="1.5"/><text x="56" y="124" fill="#bcc6ff">Cloud frontier model</text><text x="56" y="137" fill="#7d92b3" font-size="9">most capable · via your key</text>
+        </g>
+        <g stroke="#7de4ff" stroke-width="1.4" fill="none" opacity="0.75">
+          <path d="M 210 82 C 245 82 245 96 268 98" marker-end="url(#ar2)"/>
+          <path d="M 210 126 C 245 126 245 104 268 102" marker-end="url(#ar2)"/>
+        </g>
+        <text x="600" y="103" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9fc7dd">pick one — or fall back</text>
+        <text x="600" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9fc7dd">from one to the other</text>
+        <text x="360" y="172" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#7de4ff">same surface, pluggable core</text>
+      </svg>
+      <figcaption>Local for privacy and offline use, cloud for raw capability — the surrounding brain doesn't change, and one can stand in for the other.</figcaption>
+    </figure>
+
+    <div class="grid grid-2">
+      <div class="card region"><span class="name" style="color:#a9eccf">Local mode</span><p>A model running entirely on your own device. Private by default, works offline, nothing leaves the machine — the brain's memory and skills wrapped around a mind that's wholly yours.</p></div>
+      <div class="card region"><span class="name" style="color:#bcc6ff">Cloud mode</span><p>A frontier model reached over the network for maximum capability when you want it. Because the surface is identical, the brain can lean on the cloud and still fall back to local — so it keeps working even if the cloud blinks.</p></div>
+    </div>
+  </section>
+
+  <!-- ========== ADAPTIVE THINKING MODES ========== -->
+  <section id="thinking-modes">
+    <div class="sec-num">06 · Adaptive thinking modes</div>
+    <h2>The right <span class="accent">gear for every turn</span></h2>
+    <p class="lede">Choosing the <em>mind</em> is one axis; choosing how hard it should think is another. A greeting should answer instantly; a multi-step build deserves an agent loop; an open-ended question may need a full evidence sweep. TerranSoul has seven real thinking modes, and on every turn the brain reads the message and shifts into the one that fits — automatically, unless you pin a mode yourself.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 250" role="img" aria-label="An incoming turn routed by a per-turn classifier into one of four thinking modes: chat, think, research and max.">
+        <defs><marker id="tm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7de4ff"/></marker></defs>
+        <rect x="30" y="104" width="120" height="42" rx="10" fill="#0c1a27" stroke="#7de4ff" stroke-width="1.6"/>
+        <text x="90" y="123" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#bfe6f5">this turn</text>
+        <text x="90" y="137" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#7d92b3">+ recent chat</text>
+        <polygon points="178,104 214,125 178,146" fill="#0c1a27" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="196" y="98" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#9fe9f5">pick</text>
+        <g font-family="'JetBrains Mono',monospace" font-size="10">
+          <rect x="250" y="40" width="184" height="28" rx="6" fill="#0c1a27" stroke="#34d399"/><text x="264" y="58" fill="#a9eccf">Chat — grounded, instant</text>
+          <rect x="250" y="88" width="184" height="28" rx="6" fill="#0c1a27" stroke="#818cf8"/><text x="264" y="106" fill="#bcc6ff">Think — extended reasoning</text>
+          <rect x="250" y="136" width="184" height="28" rx="6" fill="#0c1a27" stroke="#fbbf24"/><text x="264" y="154" fill="#ffe1a3">Research — agentic search</text>
+          <rect x="250" y="184" width="184" height="28" rx="6" fill="#0c1a27" stroke="#7de4ff"/><text x="264" y="202" fill="#bfe6f5">Max — verify everything</text>
+        </g>
+        <g stroke="#5b8cff" stroke-width="1.2" fill="none" opacity="0.55">
+          <path d="M214,125 C234,110 234,58 248,54" marker-end="url(#tm)"/>
+          <path d="M214,125 L248,102" marker-end="url(#tm)"/>
+          <path d="M214,125 C234,132 234,152 248,150" marker-end="url(#tm)"/>
+          <path d="M214,125 C234,140 234,200 248,198" marker-end="url(#tm)"/>
+        </g>
+        <text x="438" y="121" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#9fc7dd">one mode wins,</text>
+        <text x="438" y="135" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#9fc7dd">setting depth + harness</text>
+      </svg>
+      <figcaption>Every turn is sized and routed into the mode that fits — light when it can be, heavyweight only when the work demands it.</figcaption>
+    </figure>
+
+    <p>Each mode sets two dials at once — how much the model deliberates, and which behavioural harness wraps the reply:</p>
+    <ul class="clean">
+      <li><strong>Chat</strong> — fast, grounded answers straight from the knowledge graph (one hybrid + graph-edge pass, no chain-of-thought), for greetings and quick questions.</li>
+      <li><strong>Think</strong> — extended step-by-step reasoning in a single pass, for analysis and hard questions that don’t need to go out and search.</li>
+      <li><strong>Research</strong> — an agentic multi-step search: memory + knowledge-graph walk → self-critique for coverage gaps → re-query → cited answer, for fact-checking and open-ended questions.</li>
+      <li><strong>Max</strong> — the most thorough gear: retrieve a wide candidate pool, verify every item against the request from its own source text, and loop until the result is complete and fully ranked.</li>
+    </ul>
+    <div class="callout"><strong>Auto by default, yours to pin.</strong> Left on <em>auto</em>, a per-turn router reads the request and the recent conversation and resolves the mode — so effort and harness scale with the task instead of being fixed. Choose any mode by hand and it stays put. This is the same executive sizing the brain map shows in the <em>Focus</em> region, now choosing not just <em>how much</em> to think but <em>how</em>.</div>
+  </section>
+
+  <!-- ========== DEEP RESEARCH (COVERAGE MODE) ========== -->
+  <section id="deep-research">
+    <div class="sec-num">07 · Deep research mode</div>
+    <h2>Exhaustive, <span class="accent">fully-cited answers</span></h2>
+    <p class="lede">Most turns are well served by a single recall pass and a short, confident answer. For research and agent work, the <strong>research</strong> and <strong>deep</strong> modes can instead engage an optional <strong>deep-research answer-mode</strong>: it loops — retrieve, ask a completeness critic what the answer still hasn't covered, follow knowledge-graph edges, re-query — then spend its deepest thinking on a thoroughly-cited synthesis. The point is <em>coverage and answer quality</em>, not more recall.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 250" role="img" aria-label="An exhaustive loop: retrieve, then a completeness critic asks what is still missing, expand along graph edges, re-query, and once coverage is saturated synthesise a fully cited answer.">
+        <defs><marker id="dr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker><marker id="dr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#34d399"/></marker></defs>
+        <g font-family="'JetBrains Mono',monospace" font-size="11">
+          <g><circle cx="130" cy="86" r="50" fill="#0c1a27" stroke="#22d3ee" stroke-width="1.8"/><text x="130" y="82" text-anchor="middle" fill="#9fe9f5" font-weight="500">RETRIEVE</text><text x="130" y="99" text-anchor="middle" font-size="8.5" fill="#7d92b3">exhaustively</text></g>
+          <g><circle cx="360" cy="86" r="50" fill="#0c1a27" stroke="#fbbf24" stroke-width="1.8"/><text x="360" y="78" text-anchor="middle" fill="#ffe1a3" font-weight="500">CRITIC</text><text x="360" y="94" text-anchor="middle" font-size="8.5" fill="#7d92b3">what did I</text><text x="360" y="106" text-anchor="middle" font-size="8.5" fill="#7d92b3">miss?</text></g>
+          <g><circle cx="590" cy="86" r="50" fill="#0c1a27" stroke="#34d399" stroke-width="1.8"/><text x="590" y="82" text-anchor="middle" fill="#a9eccf" font-weight="500">EXPAND</text><text x="590" y="99" text-anchor="middle" font-size="8.5" fill="#7d92b3">along edges</text></g>
+        </g>
+        <line x1="180" y1="86" x2="306" y2="86" stroke="#fbbf24" stroke-width="1.6" marker-end="url(#dr)"/>
+        <line x1="410" y1="86" x2="536" y2="86" stroke="#fbbf24" stroke-width="1.6" marker-end="url(#dr)"/>
+        <path d="M 590 136 C 590 192 130 192 130 138" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#dr)"/>
+        <text x="360" y="184" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#f0c489">re-query the gaps — loop until coverage is saturated</text>
+        <rect x="262" y="212" width="196" height="30" rx="9" fill="#0c1626" stroke="#34d399" stroke-width="1.6"/>
+        <text x="360" y="231" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#aef0cf">cited synthesis · [1][2][3]</text>
+        <path d="M 360 196 L 360 210" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#dr2)"/>
+      </svg>
+      <figcaption>Retrieve, critique coverage, expand along the graph, re-query — and only once nothing relevant is left unseen, synthesise a cited answer.</figcaption>
+    </figure>
+
+    <ul class="clean">
+      <li><strong>Retrieve per sub-question.</strong> Each critic-generated frontier query runs the same multi-signal recall with a graph-edge bridge — the loop widens the set of <em>questions asked</em>, it does not re-rank or deepen any single query's retrieval.</li>
+      <li><strong>Critique coverage.</strong> A completeness critic asks the brain <em>"what relevant memory did I not surface?"</em> over everything seen so far, and re-queues the still-missing aspects.</li>
+      <li><strong>Expand along the graph.</strong> The top results seed a walk over knowledge-graph edges, pulling in linked-but-unsurfaced memories and chaining across rounds.</li>
+      <li><strong>Stop only when dry.</strong> The loop ends when coverage is saturated, gains flatten, the frontier empties, or a generous round cap is hit — every bound a brain-seeded setting, none hardcoded.</li>
+      <li><strong>Synthesise with citations.</strong> The final answer is forced through the deepest thinking tier with full source context and rendered with <code>[n]</code> markers and a sources list — and the findings flow back into memory so the next deep pass starts further ahead.</li>
+    </ul>
+    <div class="callout"><strong>An answer-mode, not a recall benchmark.</strong> This tier trades latency for coverage and citation quality on research and agent turns. It is <em>not</em> a retrieval-recall improvement: because critic and edge hits are appended after the first round's citations without re-ranking, at the production recall depth (50) and a typical top-k (≤20) its candidate set is identical to the single-shot path — it can only change results at ranks beyond that depth, a regime production never reads. Reach for it when you need thorough, fully-cited answers, not to surface memories ordinary recall would miss.</div>
+  </section>
+
+  <!-- ========== SELF-IMPROVEMENT LOOP ========== -->
+  <section id="loop">
+    <div class="sec-num">08 · The self-improvement loop</div>
+    <h2>A brain that <span class="accent">learns from its own outcomes</span></h2>
+    <p class="lede">The point of giving a model memory isn't just to look things up — it's to get better. TerranSoul closes the loop: what the brain does, how it turns out, and what it remembers all feed back into what it recalls next time. The cycle is simply <em>write → manage → read</em>.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 240" role="img" aria-label="A closed loop: the brain writes what it learns, manages and consolidates it, reads it back on future turns, and outcomes shape what gets recalled next.">
+        <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#22d3ee"/></marker></defs>
+        <g font-family="'JetBrains Mono',monospace" font-size="12">
+          <g><circle cx="150" cy="80" r="48" fill="#0c1a27" stroke="#34d399" stroke-width="1.8"/><text x="150" y="76" text-anchor="middle" fill="#a9eccf" font-weight="500">WRITE</text><text x="150" y="93" text-anchor="middle" font-size="8.5" fill="#7d92b3">record what</text></g>
+          <g><circle cx="360" cy="80" r="48" fill="#0c1a27" stroke="#a78bfa" stroke-width="1.8"/><text x="360" y="76" text-anchor="middle" fill="#d7c4ff" font-weight="500">MANAGE</text><text x="360" y="93" text-anchor="middle" font-size="8.5" fill="#7d92b3">tidy &amp; link</text></g>
+          <g><circle cx="570" cy="80" r="48" fill="#0c1a27" stroke="#22d3ee" stroke-width="1.8"/><text x="570" y="76" text-anchor="middle" fill="#9fe9f5" font-weight="500">READ</text><text x="570" y="93" text-anchor="middle" font-size="8.5" fill="#7d92b3">recall next time</text></g>
+        </g>
+        <line x1="198" y1="80" x2="306" y2="80" stroke="#22d3ee" stroke-width="1.6" marker-end="url(#ar3)"/>
+        <line x1="408" y1="80" x2="516" y2="80" stroke="#22d3ee" stroke-width="1.6" marker-end="url(#ar3)"/>
+        <path d="M 570 128 C 570 200 150 200 150 128" fill="none" stroke="#7de4ff" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#ar3)"/>
+        <text x="360" y="196" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#7de4ff">outcomes shape what gets recalled next — the brain tunes itself</text>
+      </svg>
+      <figcaption>Write what was learned, manage it into something durable and connected, read it back when it's relevant — and let how things turned out steer future recall.</figcaption>
+    </figure>
+
+    <div class="grid grid-3">
+      <div class="card region"><span class="name" style="color:#a9eccf">Write</span><p style="font-size:14px">As the brain works, it records lessons, facts and the results of what it tried — turning experience into memory rather than letting it evaporate.</p></div>
+      <div class="card region"><span class="name" style="color:#d7c4ff">Manage</span><p style="font-size:14px">New memories are tidied, linked to related ones, and consolidated so the store stays coherent. Skills that keep succeeding gain standing; ones that keep failing are set aside.</p></div>
+      <div class="card region"><span class="name" style="color:#9fe9f5">Read</span><p style="font-size:14px">On future turns the brain recalls what's relevant — and because outcomes fed back in, what surfaces is shaped by what actually worked before.</p></div>
+    </div>
+    <div class="callout"><strong>Why it matters:</strong> this is the difference between a tool you re-teach every session and a companion that compounds — one whose recall quietly improves the more you use it.</div>
+  </section>
+
+  <!-- ========== MCP NERVE ========== -->
+  <section id="mcp">
+    <div class="sec-num">09 · The MCP nerve</div>
+    <h2>One brain, reached and fed <span class="accent">through one connection</span></h2>
+    <p class="lede">Every region connects to the world through a single nerve: the Model Context Protocol. That means any client can query the same brain — and the brain, in turn, keeps itself current by pulling from its own sources. Knowledge written by one client is legible to the next.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 250" role="img" aria-label="Many clients query one brain over MCP on one side; the brain pulls from its own connectors, repo brains and peer instances on the other.">
+        <defs>
+          <marker id="qa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7de4ff"/></marker>
+          <marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+        </defs>
+        <text x="120" y="18" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" letter-spacing="0.1em" fill="#5f8aa3">QUERIED BY</text>
+        <text x="600" y="18" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" letter-spacing="0.1em" fill="#7a6a3f">PULLS FROM</text>
+        <g font-family="'JetBrains Mono',monospace" font-size="10" fill="#9fc7dd">
+          <rect x="40" y="30" width="160" height="26" rx="6" fill="#0c1a27" stroke="#27506c"/><text x="54" y="47">Claude Code</text>
+          <rect x="40" y="64" width="160" height="26" rx="6" fill="#0c1a27" stroke="#27506c"/><text x="54" y="81">Codex</text>
+          <rect x="40" y="98" width="160" height="26" rx="6" fill="#0c1a27" stroke="#34d399"/><text x="54" y="115" fill="#aef0cf">apps &amp; companions</text>
+          <rect x="40" y="132" width="160" height="26" rx="6" fill="#0c1a27" stroke="#22d3ee"/><text x="54" y="149" fill="#bff0ff">peer TerranSoul</text>
+          <rect x="40" y="166" width="160" height="26" rx="6" fill="#0c1a27" stroke="#27506c"/><text x="54" y="183">+ any MCP client</text>
+        </g>
+        <g stroke="#7de4ff" stroke-width="1.3" fill="none" opacity="0.7">
+          <path d="M 200 43 C 250 43 290 105 300 116" marker-end="url(#qa)"/>
+          <path d="M 200 77 C 250 77 295 110 300 119" marker-end="url(#qa)"/>
+          <path d="M 200 111 L 300 121" marker-end="url(#qa)"/>
+          <path d="M 200 145 C 250 145 295 130 300 124" marker-end="url(#qa)"/>
+          <path d="M 200 179 C 250 179 290 138 300 127" marker-end="url(#qa)"/>
+        </g>
+        <rect x="302" y="100" width="56" height="44" rx="10" fill="#06121c" stroke="#7de4ff" stroke-width="1.6"/>
+        <text x="330" y="126" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#bfe6f5">MCP</text>
+        <line x1="358" y1="122" x2="392" y2="122" stroke="#7de4ff" stroke-width="1.5" marker-end="url(#qa)"/>
+        <rect x="394" y="96" width="76" height="52" rx="14" fill="#06121c" stroke="#22d3ee" stroke-width="2"/>
+        <text x="432" y="120" text-anchor="middle" font-family="'Orbitron',sans-serif" font-weight="600" font-size="12" fill="#dffaff">brain</text>
+        <text x="432" y="135" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#6f93a8">one shared memory</text>
+        <g font-family="'JetBrains Mono',monospace" font-size="10" fill="#ffe1a3">
+          <rect x="520" y="40" width="160" height="26" rx="6" fill="#0c1a27" stroke="#fbbf24"/><text x="534" y="57">source connectors</text>
+          <rect x="520" y="109" width="160" height="26" rx="6" fill="#0c1a27" stroke="#fbbf24"/><text x="534" y="126">per-repo brains</text>
+          <rect x="520" y="178" width="160" height="26" rx="6" fill="#0c1a27" stroke="#fbbf24"/><text x="534" y="195">peer TerranSoul</text>
+        </g>
+        <g stroke="#fbbf24" stroke-width="1.3" fill="none" opacity="0.75">
+          <path d="M 520 53 C 490 53 480 110 472 118" marker-end="url(#sa)"/>
+          <path d="M 520 122 L 472 122" marker-end="url(#sa)"/>
+          <path d="M 520 191 C 490 191 480 134 472 126" marker-end="url(#sa)"/>
+        </g>
+        <text x="360" y="238" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#7de4ff">one brain — consumed by any client, fed by its own sources</text>
+      </svg>
+      <figcaption>The same brain is queried by coding agents, apps and even peer instances — and it keeps itself current by pulling from connectors, repo brains and peers.</figcaption>
+    </figure>
+
+    <div class="grid grid-2">
+      <div class="card region"><span class="name" style="color:#bfe6f5">Queried by anything</span><p>Coding assistants like Claude Code and Codex, desktop and mobile apps, and even another TerranSoul — all reach the same brain over one protocol. Whatever one client learns, the next can read.</p></div>
+      <div class="card region"><span class="name" style="color:#ffe1a3">Fed by its own sources</span><p>The flow runs both ways. The brain also pulls in fresh material from connectors, from per-project repo brains, and from peer instances — so its memory stays current without you feeding it by hand.</p></div>
+    </div>
+  </section>
+
+  <!-- ========== COGNITIVE FACULTIES (BCF) ========== -->
+  <section id="faculties">
+    <div class="sec-num">10 · Cognitive faculties</div>
+    <h2>Twenty-one named faculties, each in <span class="accent">a real brain region</span></h2>
+    <p class="lede">The six regions are the coarse map. Inside them the brain is growing a layer of finer <strong>cognitive faculties</strong> — BCF-01 through BCF-21 — drawn from cognitive neuroscience and each anchored to the part of a human brain that does the same job. The roster was completed against a four-angle research sweep (cognitive-neuroscience taxonomy, the cognitive-architecture canon, LLM-agent architectures, and deep dives on insight, creativity, metacognition and curiosity), which added three faculties the literature treats as core — <strong>insight</strong>, <strong>creativity</strong>, and <strong>cognitive control</strong>. All twenty-one are now implemented (v1) — the complete roster, each anchored to its matching region on the interactive brain map.</p>
+    <div class="callout"><strong>Refreshed against the 2026 frontier.</strong> A freshest-2026 sweep (June-2026 agent-memory preprints, the DeepMind cognitive-AGI framework, and the 2026 cognitive-neuroscience literature) re-checked the roster. It mostly <em>confirmed</em> the set — and added one genuinely-distinct faculty, <strong>governed self-evolving memory</strong> (BCF-21): the write-time safety gate that guards the brain's own autonomous memory against drift, poisoning and unbounded growth. The rest of the frontier landed as dated refinements to existing faculties (memory-aware test-time scaling, latent world-model rollout, conservative consolidation, learned retrieval policies).</div>
+
+    <h3>Four faculties, up close</h3>
+    <div class="grid grid-2">
+      <div class="card region"><span class="tag" style="color:#22d3ee"><span class="dot" style="background:#22d3ee"></span>BCF-01 · frontal lobe / prefrontal</span><span class="name">Metacognitive confidence calibration</span><p>A second-order monitor that estimates a <em>calibrated</em> confidence in the brain's own answer <em>before</em> it is spoken, and routes the turn to one of four honest choices — answer, deliberate, seek more evidence, or abstain. It reads only structural signals (top score, margin, retrieval quality, agreement across samples, supporting links) and learns its own calibration curve from logged outcomes, so a small local model can decline to bluff rather than hallucinate confidently.</p></div>
+      <div class="card region"><span class="tag" style="color:#818cf8"><span class="dot" style="background:#818cf8"></span>BCF-02 · hypothalamus · drives</span><span class="name">Motivation, drives &amp; homeostasis</span><p>Endogenous "what should I do now" for an always-on resident. A set of homeostatic drives — coverage (curiosity), competence (mastery), integrity (coherence), upkeep (tidiness) and bond (connection) — each measured from real store metrics. Deviation from a setpoint becomes a need signal, and closing a gap or tidying the store is intrinsic reward. The highest-need drive surfaces as an intent for the goal-stack to act on; drive weights are <em>learned</em> from whether pursuing them tends to succeed.</p></div>
+      <div class="card region"><span class="tag" style="color:#818cf8"><span class="dot" style="background:#818cf8"></span>BCF-03 · dorsolateral PFC · executive</span><span class="name">Executive function &amp; goal-stack</span><p>The agenda that turns a fleeting drive into sustained pursuit. A prioritised stack of goals that persists across sessions, with arbitration (priority × drive-weight × due-ness, plus a commitment bonus), a suspend / resume / done / abandon lifecycle, progress tracking that auto-closes finished goals, and commitments with optional deadlines. Stale goals decay so neglected ones sink. This is the difference between a reactive chatbot and an agent that follows through.</p></div>
+      <div class="card region"><span class="tag" style="color:#a78bfa"><span class="dot" style="background:#a78bfa"></span>BCF-15 · post-retrieval · set audit</span><span class="name">Systematic retrieval-bias detection</span><p>A fairness check on the <em>whole</em> retrieved set, run after rerank but before the model sees it. Four structural metrics — source concentration, recency skew, single-cluster dominance and contradiction density, each normalised to a 0–1 score with no domain word-lists — flag a skewed set and down-weight it. It judges the <em>set</em>, where the per-document quality check judges each row, and its thresholds self-tune from their own flag-rate history.</p></div>
+    </div>
+    <div class="callout"><strong>How they stay honest:</strong> every threshold, weight and setpoint above lives in the brain's own seeded configuration, not as a number hardcoded in source — so the brain can re-tune itself, and a fresh store with no seed simply has the faculty switched off. Each faculty writes only its own rows through the one MCP gateway; there are no private caches.</div>
+
+    <h3 style="margin-top:26px">The full faculty roster &amp; its brain-region map</h3>
+    <p>Each faculty sits beside the anatomical region that performs the matching function in a human brain — consistent with the placements on the <a href="../brain-architecture/">interactive brain map</a>. <span class="muted">Every faculty below is <strong style="color:#7dffd0">implemented (v1)</strong> today — the full twenty-one-faculty roster, complete.</span></p>
+    <div class="bcf-grid">
+      <div class="bcf-row"><span class="bcf-code">BCF-01</span><div class="bcf-body"><div class="bcf-title">Confidence calibration <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Frontal lobe · prefrontal · metacognition</div><p>Knows when it doesn't know — calibrated self-confidence that gates answer vs. abstain vs. seek-more.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-02</span><div class="bcf-body"><div class="bcf-title">Drives &amp; homeostasis <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Hypothalamus · motivation</div><p>Setpoint need-variables plus intrinsic reward from learning-progress — the source of self-directed activity.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-03</span><div class="bcf-body"><div class="bcf-title">Executive · goal-stack <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Dorsolateral PFC · executive</div><p>A durable, arbitrated goal stack with suspend/resume and commitment tracking that persists across sessions.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-04</span><div class="bcf-body"><div class="bcf-title">Affect · appraisal · mood <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Limbic · amygdala</div><p>Appraises events against goals into a stored mood that decays — and modulates what becomes salient.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-05</span><div class="bcf-body"><div class="bcf-title">Attention · workspace gate <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Thalamo-cortical · broadcast</div><p>A winner-take-all bottleneck arbitrating memories, drives, intentions, affect and surprise for the one context window.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-06</span><div class="bcf-body"><div class="bcf-title">Theory of mind · user-model <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Temporoparietal · mentalizing</div><p>An explicit model of what the user knows, wants and feels, held apart from the agent's own.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-07</span><div class="bcf-body"><div class="bcf-title">Prospective memory <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Rostral PFC · intentions</div><p>A "do Y when X happens / at time T" store that fires an intention when its cue is met — follow-through beyond the turn.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-08</span><div class="bcf-body"><div class="bcf-title">Test-time-compute allocator <span class="badge badge-live">shipped</span></div><div class="bcf-reg">PFC · System-1 / System-2</div><p>Decides how much deliberation to spend, escalating only when confidence is low — System-2 on demand without retraining.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-09</span><div class="bcf-body"><div class="bcf-title">Curiosity · info-seeking <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Dopaminergic · seeking</div><p>Acts on detected gaps with curiosity-driven questions and self-directed search, rewarded for closing a gap.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-10</span><div class="bcf-body"><div class="bcf-title">World model · prediction <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Predictive cortex · forward model</div><p>Causal "if I do X then Y" transitions for forward simulation and counterfactuals — the source of prediction-error.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-11</span><div class="bcf-body"><div class="bcf-title">Consolidation · reconsolidation <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Hippocampal replay · CLS</div><p>Idle replay that distils episodes into durable generalisations and revises stale beliefs in place.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-12</span><div class="bcf-body"><div class="bcf-title">Verified skill library <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Basal ganglia · procedural</div><p>Self-verified, precondition-keyed runnable skills with an automatic curriculum — learning to act, not just recall.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-13</span><div class="bcf-body"><div class="bcf-title">Self · narrative identity <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Default-mode · narrative self</div><p>A continuous self-narrative that binds sessions into one persistent "I" — the heart of resident embodiment.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-14</span><div class="bcf-body"><div class="bcf-title">Context compression <span class="badge badge-live">shipped</span></div><div class="bcf-reg">PFC · context manager</div><p>Progressive summarisation / virtual-context paging that keeps long sessions coherent without abrupt truncation.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-15</span><div class="bcf-body"><div class="bcf-title">Retrieval-bias detection <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Post-retrieval · occipital · set audit</div><p>Audits the retrieved set for statistical skew and down-weights it before injection.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-16</span><div class="bcf-body"><div class="bcf-title">Analogical reasoning <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Association cortex · structure-mapping</div><p>Aligns relational structure across domains to transfer a solution schema — human-like generalisation.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-17</span><div class="bcf-body"><div class="bcf-title">Multimodal perception <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Occipital · perception</div><p>A perception front-end mapping image / screen / spatial input into the same memory schema with spatial graph edges.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-18</span><div class="bcf-body"><div class="bcf-title">Insight · restructuring <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Right anterior temporal · association cortex</div><p>When analytic search stalls, it re-encodes the stuck problem and reaches a remote association — the Aha! leap, measured as a real solution jump, not a token.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-19</span><div class="bcf-body"><div class="bcf-title">Creativity · divergent thinking <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Default-mode + control · generate-evaluate</div><p>Generates many varied candidate ideas then filters them against constraints — balancing novelty against appropriateness on the four classic divergent-thinking axes.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-20</span><div class="bcf-body"><div class="bcf-title">Cognitive control · inhibition <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Anterior cingulate · right IFG · conflict/error</div><p>Inhibits a prepotent or unsafe answer, monitors conflict between candidate responses, and catches its own errors to trigger self-correction.</p></div></div>
+      <div class="bcf-row"><span class="bcf-code">BCF-21</span><div class="bcf-body"><div class="bcf-title">Governed self-evolving memory <span class="badge badge-live">shipped</span></div><div class="bcf-reg">Hippocampal–prefrontal gate · memory governance</div><p>A write-time safety gate over the brain's own autonomous writes — guarding against belief drift, poisoned or anomalous sources, and unbounded growth, and quarantining peer-brain imports until corroborated.</p></div></div>
+    </div>
+    <div class="callout"><strong>Why anatomy:</strong> the mapping isn't decoration. Confidence and executive control belong to the prefrontal cortex; drives to the hypothalamus; affect to the limbic system; memory consolidation to the hippocampus; perception to the occipital cortex — so the brain-region a faculty sits in is also the clearest shorthand for what it does.</div>
+  </section>
+
+  <!-- ========== DATABASE DESIGN ========== -->
+  <section id="database">
+    <div class="sec-num">11 · Database design</div>
+    <h2>One clean schema, <span class="accent">sharded for the write storm</span></h2>
+    <p class="lede">The memory store is being rebuilt around a single, self-contained schema instead of a long chain of in-place upgrades — and split into purpose-built shards sized for the order of a million memories, so the high-frequency writes of an always-on resident never block recall. <span class="muted">This section is a <strong>design contract</strong>: the spec a follow-up change implements, not yet live in the store. Because TerranSoul is pre-release there is no production data to migrate, so the schema can be recreated clean.</span></p>
+
+    <h3>Why redesign — three structural debts</h3>
+    <ul class="clean">
+      <li><strong>A 33-step migration chain no real database needs.</strong> The old store carried one canonical schema <em>plus</em> ~20 self-heal helpers that dragged a hypothetical old table forward column-by-column — dead weight that bloated startup and made the true schema hard to read.</li>
+      <li><strong>One monolithic database file.</strong> A single SQLite file is single-writer: ingest, access-counter bumps, embedding writes, decay and append-only logging all serialised behind one lock, and every checkpoint replayed all of it.</li>
+      <li><strong>Unbounded append-only logs.</strong> Telemetry (~86k rows/day), traces, sync and calibration logs had no retention policy — inflating the write-ahead log and slowing every scan, even though their write-once, sequential access pattern is the opposite of the random-access knowledge table.</li>
+    </ul>
+
+    <h3>One definition, five table groups</h3>
+    <p>The canonical schema plus its version-helper chain collapse into a <strong>single schema applied once</strong> (version reset to 1). Every column exists in its <code>CREATE TABLE</code> from the start — no backfills, no "create indexes last" ordering hazard. The schema reads as five clearly fenced groups:</p>
+    <table class="dtable">
+      <thead><tr><th>Group</th><th>Purpose</th><th>Holds</th></tr></thead>
+      <tbody>
+        <tr><td><code>G1</code> core memory</td><td>the knowledge base + provenance</td><td>memories, versions, conflicts, sources, offload payloads</td></tr>
+        <tr><td><code>G2</code> embeddings &amp; index</td><td>vector + keyword retrieval surfaces</td><td>embeddings, pending-embeddings, full-text index + its sync triggers</td></tr>
+        <tr><td><code>G3</code> knowledge graph</td><td>typed edges + pre-aggregated stats</td><td>edges, graph clusters</td></tr>
+        <tr><td><code>G4</code> append-only logs</td><td>write-heavy, time-ordered, retention-bounded</td><td>traces, telemetry, sync log, calibration log, safety decisions</td></tr>
+        <tr><td><code>G5</code> cognitive-faculty tables</td><td>learning / metacognition state on the hot path</td><td>reinforcements, trigger patterns, gaps, tool-skills, action-trust ledger, decomposition cache, paired devices</td></tr>
+      </tbody>
+    </table>
+    <p>To keep the hot row narrow, the rarely-read <strong>procedural ledger</strong> (success / failure counts, activation tier, deprecation flag) moves out of the wide <code>memories</code> table into a keyed G5 side table — so the 90% retrieval path reads a compact row and the promoter pays a cheap join only when it needs the counters.</p>
+
+    <h3>Sharded for high-throughput writes</h3>
+    <p>The store opens one primary connection and <em>attaches</em> siblings — a single-process scale-out where joins still work but each file gets its own write-ahead log, checkpoint cadence, cache and lock. Routing is keyed on the two axes the memory model already encodes — <strong>tier</strong> (working vs. long) and <strong>access pattern</strong> (random-access knowledge vs. sequential logs):</p>
+    <div class="grid grid-3">
+      <div class="card shard"><span class="sh-tag" style="color:#34d399">durable · primary</span><span class="sh-name">long.db</span><p>The canonical read-heavy RAG database — core memory, embeddings and the knowledge graph. Tuned with the largest cache for fast fused recall.</p></div>
+      <div class="card shard"><span class="sh-tag" style="color:#a78bfa">session-scoped</span><span class="sh-name">working.db</span><p>Working-memory churn that promotes and evicts every turn, aggressively checkpointed so it never dirties the durable index.</p></div>
+      <div class="card shard"><span class="sh-tag" style="color:#fbbf24">write-heavy logs</span><span class="sh-name">logs.db</span><p>Append-only telemetry and traces on a separate checkpoint, decoupling high-frequency log writes from retrieval latency.</p></div>
+    </div>
+    <p>On top of the shards, several mechanisms absorb the write rate of a resident that records something on nearly every turn:</p>
+    <ul class="clean">
+      <li><strong>In-memory write buffer for the hottest counter.</strong> The per-search access-count bump is the worst write-amplifier; instead of one disk write per query it is accumulated in memory and flushed asynchronously, cutting write-ahead-log frames by roughly two orders of magnitude and removing the read/write lock fight on the hot path.</li>
+      <li><strong>Group-commit batching.</strong> A chat turn's many reads run in one transaction, and ingest lands in ~1000-row micro-transactions rather than row-at-a-time, so the durable index commits in batches instead of thrashing the log.</li>
+      <li><strong>Per-shard write-ahead tuning.</strong> Each attached file carries pragmas matched to its role — a large cache and relaxed checkpoint for the read-heavy durable shard, tight checkpoints for the churny working and log shards — with a one-writer / many-reader connection pool.</li>
+      <li><strong>Time-partitioned logs with retention.</strong> Each append-only table rotates into monthly partitions; a background task moves cold partitions to an archive and hard-deletes past a generous per-table window, so the logs never grow without bound.</li>
+      <li><strong>Hot/cold split inside the durable shard.</strong> Partial indexes let recall scan only the live ~10% of the corpus for far better cache residency, while decay and garbage-collection touch the cold rows without stalling reads.</li>
+    </ul>
+    <div class="callout"><strong>What stays invariant:</strong> every read and write still flows through the one MCP gateway — sharding is entirely internal to the store, and no client ever opens a shard directly or keeps a private cache. The table groups, shard keys, retention windows and pragmas are generic infrastructure; none of them encode any task answer.</div>
+  </section>
+
+  <!-- ========== COMPETITOR ADOPTIONS ========== -->
+  <section id="adoptions">
+    <div class="sec-num">12 · Adopted from the field</div>
+    <h2>Best ideas from rival agents, <span class="accent">re-grounded as our own</span></h2>
+    <p class="lede">TerranSoul studies competing agent systems and folds their strongest <em>generic</em> patterns into the brain — reimplemented on existing modules as domain-agnostic primitives. No upstream source, prompts, branded identity or schema is copied; each adoption <strong>enhances</strong> a part of the brain rather than bolting on a parallel one. Influences are credited in the project's CREDITS file.</p>
+
+    <div class="grid grid-2">
+      <div class="card region"><span class="tag" style="color:#34d399"><span class="dot" style="background:#34d399"></span>GENesis-AGI · self-improvement primitives</span><span class="name">Sharper recall &amp; safe consolidation</span><p>A study of GENesis-AGI contributed several generic mechanisms, each reimplemented in Rust: an <strong>activation signal</strong> as an extra recall term (how alive a memory is right now), an <strong>echo-collapse diversity pass</strong> that stops near-duplicates dominating a result set, <strong>auto-linking on write</strong> so new memories join the graph immediately, <strong>consolidation safety gates</strong> (reversible rollback, faithfulness review, a shrink guard), and <strong>outcome-classified write-back</strong> that routes a five-class session outcome to reinforce, quarantine or extract.</p></div>
+      <div class="card region"><span class="tag" style="color:#fbbf24"><span class="dot" style="background:#fbbf24"></span>Hermes · autonomous skill loop</span><span class="name">Mint, prove &amp; refine new skills</span><p>Reverse-engineered from the Hermes agent (generically, nothing vendored): a closed learning loop — <em>observe → author → validate → register → reuse → refine</em> — that detects a recurring or workaround-successful trajectory and <strong>creates a fresh reusable skill</strong>, the one capability the brain lacked. New skills are governed by the existing confidence ledger, surfaced by <strong>description-first retrieval</strong> (names and one-liners in the prompt, bodies hydrated on match), and curated through an Active → Stale → Archived lifecycle. <span class="muted">Design contract; not yet shipped.</span></p></div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card region"><span class="tag" style="color:#22d3ee"><span class="dot" style="background:#22d3ee"></span>Hermes · automation blueprints</span><span class="name">Routines it proposes, you approve</span><p>A blueprint unifies a parameterised skill and a human-friendly schedule into one typed object — no raw cron is ever written. When the brain notices a routine worth automating it adds a <strong>consent-first suggestion</strong> to a queue: it proposes, you accept or dismiss, and only an explicit accept ever schedules anything. The proposal bar is learned from how often suggestions are taken up, so it grows more or less forward over time.</p></div>
+      <div class="card region"><span class="tag" style="color:#f472b6"><span class="dot" style="background:#f472b6"></span>OpenClaw · proactive commitments</span><span class="name">Closing the loops you left open</span><p>A continuously-running companion should notice the follow-ups a conversation leaves dangling — "I'll let you know when the build finishes," "check in after their interview" — without being asked. Inferred open-loops are stored as future intentions, and a gentle heartbeat surfaces the <em>due</em> ones through the same attention gate as everything else, held back by quiet-hours, busy-skip and don't-repeat guards so it never nags. How proactive it is, is itself learned.</p></div>
+    </div>
+
+    <h3>The patterns it borrows — and where they land</h3>
+    <ul class="clean">
+      <li><strong>A proof-before-trust ledger.</strong> A synthesized skill is born "cold" and advisory-only: retrievable for audit but never auto-injected until it earns promotion through the confidence ledger and clears an offline replay check that confirms it doesn't lower answer quality. Unproven know-how can't change live behaviour.</li>
+      <li><strong>Snapshot-style checkpoints.</strong> Every self-authored write is snapshotted before it mutates anything and archived rather than deleted, so a bad consolidation can be rolled back — and a <strong>frozen-snapshot write</strong> persists to disk now but only folds into the prompt next session, keeping the model's prefix cache stable mid-conversation.</li>
+      <li><strong>Self-repairing skills.</strong> Re-authoring an existing skill is an <em>idempotent patch</em> keyed on source + name, so an outdated procedure is updated in place instead of spawning a duplicate — repair, not proliferation.</li>
+      <li><strong>A pre-write safety scan.</strong> Before any self-authored artefact is stored, a generic content scan (prompt-injection, credential-exfiltration, hidden-character checks) gates it behind a trust tier and quarantines anything below the floor — complementing the faithfulness review that already guards fidelity.</li>
+      <li><strong>An import seam for external tool-skills.</strong> The same skill catalog can ingest tool-skills from sibling agents such as OpenClaw and Hermes, tagged by source, so imported, synthesized and built-in skills share one search, install and uninstall surface.</li>
+    </ul>
+    <div class="callout"><strong>Every borrowed knob is brain-resident.</strong> Cluster sizes, look-back windows, length caps, promotion floors and curator timings all live in the brain's seeded configuration — read at runtime, never hardcoded — so adoptions stay tunable and free of task-specific answers.</div>
+  </section>
+
+  <!-- ========== CLOSING ========== -->
+  <section id="closing">
+    <div class="sec-num">13 · In a sentence</div>
+    <h2>The whole idea</h2>
+    <p class="lede">One frozen LLM, one nerve (MCP), and the 21 BCF components above sitting between them — each one reads/writes its own tables, each one is reachable by the model on every turn. Nothing here retrains the model; every capability lives in the memory layer, which is why it's auditable and swappable independent of the model.</p>
+    <div class="hero-cta" style="margin-top:8px">
+      <a class="btn" href="../brain-architecture/">See it as an interactive map →</a>
+      <a class="btn ghost" href="../LLM-Brain-Design-Research-Paper/">Read the measured results →</a>
+    </div>
+    <div class="endmark">TerranSoul · brain &amp; memory</div>
+  </section>
+
+</main>
+
+<footer class="page-foot">
+  <div class="foot-in">
+    <div>
+      <div class="brand" style="margin-bottom:8px"><span class="brand-mark"></span> <span style="color:#eef6ff">TerranSoul</span></div>
+      <div class="muted">A self-learning AI companion with a persistent brain.</div>
+    </div>
+    <div class="foot-links">
+      <a href="../">Docs home</a>
+      <a href="../brain-architecture/">Brain architecture</a>
+      <a href="../LLM-Brain-Design-Research-Paper/">Research paper</a>
+      <a href="../zorkgpt/">ZorkGPT bench</a>
+      <a href="https://github.com/TerranSyn/TerranSoul">GitHub &#8599;</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
