@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Tesseres - Mission Pitch</title>
-<meta name="description" content="A short pitch for the Tesseres mission: bring Sovereign AI to every individual, every business, and every nation. / Sứ mệnh Tesseres." />
-<link rel="canonical" href="https://terranimus.github.io/Tesseres/pitch/" />
+<title>Terranimus - Mission Pitch</title>
+<meta name="description" content="A short pitch for the Terranimus mission: bring Sovereign AI to every individual, every business, and every nation. / Sứ mệnh Terranimus." />
+<link rel="canonical" href="https://terranimus.github.io/pitch/" />
 <style>
   :root{
     --bg: oklch(0.985 0.008 80);
@@ -347,7 +347,7 @@
 <body>
 
 <header class="topbar">
-  <a class="brand" href="../"><span class="dot" aria-hidden="true"></span> Tesseres</a>
+  <a class="brand" href="../"><span class="dot" aria-hidden="true"></span> Terranimus</a>
   <div class="langswitch" role="group" aria-label="Language / Ngôn ngữ">
     <button class="lang-btn" data-set-lang="en" aria-pressed="true">EN</button>
     <button class="lang-btn" data-set-lang="vi" aria-pressed="false">VI</button>
@@ -357,10 +357,10 @@
 <main class="deck" id="deck">
 
   <!-- Slide 1: Title -->
-  <section class="slide" id="s1" aria-label="Tesseres">
+  <section class="slide" id="s1" aria-label="Terranimus">
     <div class="slide-inner">
       <div data-lang="en">
-        <p class="kicker">Tesseres · Mission</p>
+        <p class="kicker">Terranimus · Mission</p>
         <h1>Sovereign AI</h1>
         <p class="tag">AI owned by people, not rented from a few.</p>
         <div class="links">
@@ -368,7 +368,7 @@
         </div>
       </div>
       <div data-lang="vi" hidden>
-        <p class="kicker">Tesseres · Sứ mệnh</p>
+        <p class="kicker">Terranimus · Sứ mệnh</p>
         <h1>AI có chủ quyền</h1>
         <p class="tag">AI do con người sở hữu, không phải đi thuê.</p>
         <div class="links">
@@ -735,19 +735,19 @@
   <section class="slide alt" id="s7">
     <div class="slide-inner">
       <div data-lang="en">
-        <p class="kicker">Tesseres</p>
+        <p class="kicker">Terranimus</p>
         <p class="big">The future of AI should belong to everyone.</p>
         <div class="links">
-          <a class="cta" href="../?lang=en">Explore Tesseres</a>
-          <a class="cta ghost" href="https://terranimus.github.io/LLM-Brain-Design-Research-Paper/">Read the research</a>
+          <a class="cta" href="../?lang=en">Explore Terranimus</a>
+          <a class="cta ghost" href="https://terranimus.github.io/TerranSoul/LLM-Brain-Design-Research-Paper/">Read the research</a>
         </div>
       </div>
       <div data-lang="vi" hidden>
-        <p class="kicker">Tesseres</p>
+        <p class="kicker">Terranimus</p>
         <p class="big">Tương lai của AI nên thuộc về tất cả mọi người.</p>
         <div class="links">
-          <a class="cta" href="../?lang=vi">Khám phá Tesseres</a>
-          <a class="cta ghost" href="https://terranimus.github.io/LLM-Brain-Design-Research-Paper/">Đọc nghiên cứu</a>
+          <a class="cta" href="../?lang=vi">Khám phá Terranimus</a>
+          <a class="cta ghost" href="https://terranimus.github.io/TerranSoul/LLM-Brain-Design-Research-Paper/">Đọc nghiên cứu</a>
         </div>
       </div>
     </div>
@@ -760,7 +760,7 @@
 <script>
 (function(){
   var VALID = ['en','vi'];
-  // Same key as Tesseres/index.html's LANG_KEY -- shared across this
+  // Same key as Terranimus/index.html's LANG_KEY -- shared across this
   // mini-cluster (not docs/index.html's own 17-language 'ts5s:lang', a
   // different scope) so a language choice survives any internal link that
   // forgets to carry `?lang=` forward (the brand/logo link back to the
@@ -788,7 +788,7 @@
     for(var j=0;j<btns.length;j++){
       btns[j].setAttribute('aria-pressed', btns[j].getAttribute('data-set-lang') === lang ? 'true' : 'false');
     }
-    document.title = (lang === 'vi') ? 'Tesseres - Sứ mệnh' : 'Tesseres - Mission Pitch';
+    document.title = (lang === 'vi') ? 'Terranimus - Sứ mệnh' : 'Terranimus - Mission Pitch';
     // The brand/logo link back to the homepage is shared markup (not
     // duplicated per data-lang block) -- without this it always pointed at
     // '../' with no `?lang=`, dropping a VI reader back to English on click.
