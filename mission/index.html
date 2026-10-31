@@ -34,6 +34,10 @@
   html,body{margin:0;padding:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-wrap:break-word}
   a{color:var(--accent-ink);text-decoration:none}
   [data-lang][hidden]{display:none !important}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+  .skip{position:absolute;left:12px;top:-60px;z-index:70;background:var(--bg-card);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:8px 14px;font-size:14px}
+  .skip:focus{top:12px}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none !important;scroll-behavior:auto !important}}
 
   .topbar{position:sticky;top:0;z-index:50;background:color-mix(in oklab, var(--bg) 88%, transparent);backdrop-filter:saturate(140%) blur(10px);-webkit-backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--rule)}
   .topbar-in{max-width:var(--maxw);margin:0 auto;padding:12px 32px;display:flex;flex-wrap:wrap;row-gap:8px;align-items:center;gap:20px;font-size:13px}
@@ -79,6 +83,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main"><span data-lang="en">Skip to content</span><span data-lang="vi" hidden>Đến nội dung chính</span></a>
 <header class="topbar">
   <div class="topbar-in">
     <a class="brand" href="../"><span class="brand-mark" aria-hidden="true"></span> Terranimus</a>
@@ -102,7 +107,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <section class="m-hero">
     <div class="wrap">
       <p class="eyebrow"><span class="dot"></span><span data-lang="en">Our mission</span><span data-lang="vi" hidden>Sứ mệnh của chúng tôi</span></p>
@@ -150,6 +155,9 @@
     for(var i=0;i<nodes.length;i++){ nodes[i].hidden = (nodes[i].getAttribute('data-lang') !== l); }
     docEl.setAttribute('lang', l);
     for(var b=0;b<btns.length;b++){ btns[b].setAttribute('aria-pressed', btns[b].getAttribute('data-set-lang') === l ? 'true' : 'false'); }
+    var TL = (l === 'vi') ? {light:'Sáng',system:'Theo hệ thống',dark:'Tối'} : {light:'Light',system:'System theme',dark:'Dark'};
+    var tbs = document.querySelectorAll('.theme-btn');
+    for(var t=0;t<tbs.length;t++){ var tk = tbs[t].getAttribute('data-set-theme'); if(TL[tk]){ tbs[t].setAttribute('aria-label', TL[tk]); tbs[t].setAttribute('title', TL[tk]); } }
     document.title = (l === 'vi') ? 'Sứ mệnh - Terranimus' : 'Mission - Terranimus';
     try{ localStorage.setItem(KEY, l); }catch(e){}
     try{ var u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null,'',u.pathname+u.search+u.hash); }catch(e){}
