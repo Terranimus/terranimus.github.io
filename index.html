@@ -37,6 +37,10 @@
   html,body{margin:0;padding:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-wrap:break-word}
   a{color:var(--accent-ink);text-decoration:none}
   [data-lang][hidden]{display:none !important}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+  .skip{position:absolute;left:12px;top:-60px;z-index:70;background:var(--bg-card);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:8px 14px;font-size:14px}
+  .skip:focus{top:12px}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none !important;scroll-behavior:auto !important}}
 
   .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);width:0;z-index:60;transition:width 80ms linear}
   .topbar{position:sticky;top:0;z-index:50;background:color-mix(in oklab, var(--bg) 88%, transparent);backdrop-filter:saturate(140%) blur(10px);-webkit-backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--rule)}
@@ -134,7 +138,8 @@
 </style>
 </head>
 <body>
-<div class="progress" id="progress"></div>
+<a class="skip" href="#main"><span data-lang="en">Skip to content</span><span data-lang="vi" hidden>Đến nội dung chính</span></a>
+<div class="progress" id="progress" aria-hidden="true"></div>
 
 <header class="topbar">
   <div class="topbar-in">
@@ -159,7 +164,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <!-- HERO -->
   <section class="section hero" id="top">
     <div class="wrap"><div class="measure">
@@ -307,6 +312,9 @@
     for(var i=0;i<nodes.length;i++){ nodes[i].hidden = (nodes[i].getAttribute('data-lang') !== l); }
     docEl.setAttribute('lang', l);
     for(var b=0;b<btns.length;b++){ btns[b].setAttribute('aria-pressed', btns[b].getAttribute('data-set-lang') === l ? 'true' : 'false'); }
+    var TL = (l === 'vi') ? {light:'Sáng',system:'Theo hệ thống',dark:'Tối'} : {light:'Light',system:'System theme',dark:'Dark'};
+    var tbs = document.querySelectorAll('.theme-btn');
+    for(var t=0;t<tbs.length;t++){ var tk = tbs[t].getAttribute('data-set-theme'); if(TL[tk]){ tbs[t].setAttribute('aria-label', TL[tk]); tbs[t].setAttribute('title', TL[tk]); } }
     document.title = (l === 'vi') ? 'Terranimus - AI có chủ quyền' : 'Terranimus - Sovereign AI';
     try{ localStorage.setItem(KEY, l); }catch(e){}
     try{ var u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null,'',u.pathname+u.search+u.hash); }catch(e){}
