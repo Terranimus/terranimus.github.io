@@ -12,31 +12,35 @@
 <style>
   :root{
     --bg: oklch(0.985 0.008 80); --bg-card: oklch(0.97 0.01 80); --bg-deep: oklch(0.93 0.012 75);
-    --ink: oklch(0.22 0.015 60); --ink-soft: oklch(0.42 0.012 65); --ink-faint: oklch(0.62 0.01 70);
+    --ink: oklch(0.22 0.015 60); --ink-soft: oklch(0.42 0.012 65); --ink-faint: oklch(0.52 0.01 70);
     --rule: oklch(0.88 0.012 75); --accent: oklch(0.62 0.14 45); --accent-soft: oklch(0.92 0.04 55); --accent-ink: oklch(0.38 0.10 45);
     --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --serif: "Newsreader", Georgia, "Times New Roman", serif;
     --mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
     --maxw: 1120px; --measure: 40rem;
-    --on-accent: oklch(0.99 0 0);
+    --on-accent: oklch(0.99 0 0); --accent-fill: oklch(0.53 0.14 45);
   }
   html[lang="vi"]{--serif: "Newsreader", Cambria, Constantia, "Times New Roman", serif;}
   @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
     --bg: oklch(0.18 0.012 60); --bg-card: oklch(0.22 0.014 60); --bg-deep: oklch(0.26 0.015 60);
-    --ink: oklch(0.94 0.010 80); --ink-soft: oklch(0.78 0.012 75); --ink-faint: oklch(0.60 0.012 70);
+    --ink: oklch(0.94 0.010 80); --ink-soft: oklch(0.78 0.012 75); --ink-faint: oklch(0.66 0.012 70);
     --rule: oklch(0.34 0.014 65); --accent: oklch(0.70 0.13 48); --accent-soft: oklch(0.34 0.06 50); --accent-ink: oklch(0.82 0.10 50);
-    --on-accent: oklch(0.15 0.01 60);
+    --on-accent: oklch(0.15 0.01 60); --accent-fill: oklch(0.70 0.13 48);
   }}
   :root[data-theme="dark"]{
     --bg: oklch(0.18 0.012 60); --bg-card: oklch(0.22 0.014 60); --bg-deep: oklch(0.26 0.015 60);
-    --ink: oklch(0.94 0.010 80); --ink-soft: oklch(0.78 0.012 75); --ink-faint: oklch(0.60 0.012 70);
+    --ink: oklch(0.94 0.010 80); --ink-soft: oklch(0.78 0.012 75); --ink-faint: oklch(0.66 0.012 70);
     --rule: oklch(0.34 0.014 65); --accent: oklch(0.70 0.13 48); --accent-soft: oklch(0.34 0.06 50); --accent-ink: oklch(0.82 0.10 50);
-    --on-accent: oklch(0.15 0.01 60);
+    --on-accent: oklch(0.15 0.01 60); --accent-fill: oklch(0.70 0.13 48);
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-wrap:break-word}
   a{color:var(--accent-ink);text-decoration:none}
   [data-lang][hidden]{display:none !important}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+  .skip{position:absolute;left:12px;top:-60px;z-index:70;background:var(--bg-card);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:8px 14px;font-size:14px}
+  .skip:focus{top:12px}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none !important;scroll-behavior:auto !important}}
 
   .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);width:0;z-index:60;transition:width 80ms linear}
   .topbar{position:sticky;top:0;z-index:50;background:color-mix(in oklab, var(--bg) 88%, transparent);backdrop-filter:saturate(140%) blur(10px);-webkit-backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--rule)}
@@ -53,12 +57,12 @@
   @media (max-width:480px){.wrap,.topbar-in{padding-left:20px;padding-right:20px}}
   .langswitch{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;background:var(--bg-card)}
   .lang-btn{appearance:none;border:0;background:transparent;color:var(--ink-soft);font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.03em;min-height:32px;padding:0 14px;cursor:pointer;transition:background 120ms,color 120ms}
-  .lang-btn[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+  .lang-btn[aria-pressed="true"]{background:var(--accent-fill);color:var(--on-accent)}
   .lang-btn:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .themeswitch{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;background:var(--bg-card)}
   .theme-btn{appearance:none;border:0;background:transparent;color:var(--ink-faint);min-height:32px;padding:0 9px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background 120ms,color 120ms}
   .theme-btn:hover{color:var(--ink)}
-  .theme-btn[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+  .theme-btn[aria-pressed="true"]{background:var(--accent-fill);color:var(--on-accent)}
   .theme-btn:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .theme-btn svg{display:block;width:15px;height:15px}
 
@@ -118,7 +122,7 @@
   .mission{background:var(--bg-deep);border:1px solid var(--rule);border-radius:14px;padding:clamp(36px,6vw,60px) clamp(22px,5vw,44px);text-align:center}
   .mission h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,36px);font-weight:500;line-height:1.18;letter-spacing:-.02em;margin:0 auto 22px;max-width:24ch;color:var(--ink)}
   .mission h2 em{font-style:italic;color:var(--accent-ink)}
-  .mission .go{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--on-accent);background:var(--accent);border-radius:99px;padding:12px 24px}
+  .mission .go{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--on-accent);background:var(--accent-fill);border-radius:99px;padding:12px 24px}
   .mission .go:hover{filter:brightness(1.06)}
 
   .foot{border-top:1px solid var(--rule);padding:44px 0 40px}
@@ -134,7 +138,8 @@
 </style>
 </head>
 <body>
-<div class="progress" id="progress"></div>
+<a class="skip" href="#main"><span data-lang="en">Skip to content</span><span data-lang="vi" hidden>Đến nội dung chính</span></a>
+<div class="progress" id="progress" aria-hidden="true"></div>
 
 <header class="topbar">
   <div class="topbar-in">
@@ -159,7 +164,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <!-- HERO -->
   <section class="section hero" id="top">
     <div class="wrap"><div class="measure">
@@ -307,6 +312,9 @@
     for(var i=0;i<nodes.length;i++){ nodes[i].hidden = (nodes[i].getAttribute('data-lang') !== l); }
     docEl.setAttribute('lang', l);
     for(var b=0;b<btns.length;b++){ btns[b].setAttribute('aria-pressed', btns[b].getAttribute('data-set-lang') === l ? 'true' : 'false'); }
+    var TL = (l === 'vi') ? {light:'Sáng',system:'Theo hệ thống',dark:'Tối'} : {light:'Light',system:'System theme',dark:'Dark'};
+    var tbs = document.querySelectorAll('.theme-btn');
+    for(var t=0;t<tbs.length;t++){ var tk = tbs[t].getAttribute('data-set-theme'); if(TL[tk]){ tbs[t].setAttribute('aria-label', TL[tk]); tbs[t].setAttribute('title', TL[tk]); } }
     document.title = (l === 'vi') ? 'Terranimus - AI có chủ quyền' : 'Terranimus - Sovereign AI';
     try{ localStorage.setItem(KEY, l); }catch(e){}
     try{ var u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null,'',u.pathname+u.search+u.hash); }catch(e){}
